@@ -1,11 +1,13 @@
 import numpy as np
 #import argparse
 import pandas as pd
+import sys
 
 
 gender_mapping = pd.read_table('/N/u/jlorince/BigRed2/gender-mapping.txt',header=None,names=['user','gender'])
+rootdir = sys.argv[1]
 #rootdir = '/N/dc2/scratch/jlorince/new_artist_discovery_rate_by_gender/'
-rootdir = '/N/dc2/scratch/jlorince/simple_artist_diversity_by_gender/'
+#rootdir = '/N/dc2/scratch/jlorince/simple_artist_diversity_by_gender/'
 
 max_length = 50000
 
