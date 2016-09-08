@@ -36,7 +36,7 @@ class gender_stuff(object):
 
         result = []
         encountered = set()
-        for a in self.df['artist_idx']:
+        for a in self.df['artist_id']:
             if a not in encountered:
                 result.append(1)
                 encountered.add(a)
