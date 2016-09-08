@@ -26,7 +26,7 @@ class gender_stuff(object):
         self.df = pd.read_table(self.args.file,header=None,names=['artist_id','ts'])
 
         self.filename = self.args.file.split('/')[-1]
-        self.user = filename[:filename.find('.')]
+        self.user = self.filename[:self.filename.find('.')]
 
 
     def rolling_new_artist_mean(self,window_size=100):
