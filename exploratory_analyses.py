@@ -25,7 +25,7 @@ class gender_stuff(object):
 
         self.df = pd.read_table(self.args.file,header=None,names=['artist_id','ts'])
 
-        filename = self.args.file.split('/')[-1]
+        self.filename = self.args.file.split('/')[-1]
         self.user = filename[:filename.find('.')]
 
 
@@ -45,7 +45,7 @@ class gender_stuff(object):
 
         with open(self.args.resultdir+self.user,'w') as fout:
             fout.write(','.join(output.fillna('').values.astype(str))+'\n')
-        self.rootLogger.info('User {} processed successfully ({})'.format(self.user,fi))
+        self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
 
 if __name__ == '__main__':
 
