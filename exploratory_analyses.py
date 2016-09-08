@@ -36,15 +36,15 @@ class gender_stuff(object):
 
         result = []
         encountered = set()
-        for a in df['artist_idx']:
+        for a in self.df['artist_idx']:
             if a not in encountered:
                 result.append(1)
                 encountered.add(a)
             else:
                 result.append(0)
-        df['new'] = result
+        self.df['new'] = result
 
-        output = pd.rolling_mean(df['new'],window=window_size)
+        output = pd.rolling_mean(self.df['new'],window=window_size)
 
         with open(self.args.resultdir+user,'w') as fout:
             fout.write(','.join(output.fillna('').values.astype(str))+'\n')
