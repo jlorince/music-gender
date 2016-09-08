@@ -41,10 +41,10 @@ class gender_stuff(object):
                 result.append(0)
         self.df['new'] = result
 
-        output = pd.rolling_mean(self.df['new'],window=window_size)
+        output = self.df['new'].rolling(window=window_size).mean()
 
         with open(self.args.resultdir+self.user,'w') as fout:
-            fout.write(','.join(output.fillna('').values.astype(str))+'\n')
+            fout.write(','.join(output[window_size-1:].fillna('').values.astype(str))+'\n')
         self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
 
 if __name__ == '__main__':
