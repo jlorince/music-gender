@@ -43,7 +43,7 @@ class gender_stuff(object):
 
         output = pd.rolling_mean(self.df['new'],window=window_size)
 
-        with open(self.args.resultdir+self.,'w') as fout:
+        with open(self.args.resultdir+self.user,'w') as fout:
             fout.write(','.join(output.fillna('').values.astype(str))+'\n')
         self.rootLogger.info('User {} processed successfully ({})'.format(self.user,fi))
 
