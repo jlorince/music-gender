@@ -25,7 +25,7 @@ class gender_stuff(object):
 
         self.df = pd.read_table(self.args.file,header=None,names=['artist_id','ts'])
 
-        filename = fi.split('/')[-1]
+        filename = self.args.file.split('/')[-1]
         self.user = filename[filename.find('.')]
 
 
