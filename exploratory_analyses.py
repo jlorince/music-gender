@@ -48,7 +48,7 @@ class gender_stuff(object):
         self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
 
     def rolling_artist_diversity(self,window_size=100):
-        output = df['artist_id'].rolling(window=100).aggregate(lambda x: len(set(x))/float(len(x)))
+        output = self.df['artist_id'].rolling(window=100).aggregate(lambda x: len(set(x))/float(len(x)))
         with open(self.args.resultdir+self.user,'w') as fout:
             fout.write(','.join(output.values.astype(str))+'\n')
         self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
