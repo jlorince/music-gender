@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--file",default=None,type=str)
     parser.add_argument("-r", "--resultdir",default=None,type=str)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     g = gender_stuff()
     g.rolling_new_artist_mean()
