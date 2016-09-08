@@ -4,6 +4,8 @@ import pandas as pd
 
 
 gender_mapping = pd.read_table('/N/u/jlorince/BigRed2/gender-mapping.txt',header=None,names=['user','gender'])
+#rootdir = '/N/dc2/scratch/jlorince/new_artist_discovery_rate_by_gender/'
+rootdir = '/N/dc2/scratch/jlorince/simple_artist_diversity_by_gender/'
 
 max_length = 50000
 
@@ -29,7 +31,7 @@ for gender in ('m','f'):
 
 # now pad and generate our means and CIs
 
-for gender in ('f',):
+for gender in ('f','m'):
     total = 0
 
     #mx = vars()['mx_{}'.format(gender)]
@@ -42,7 +44,7 @@ for gender in ('f',):
         #if user not in include:
         #    continue
         try:
-            data = np.loadtxt('/N/dc2/scratch/jlorince/new_artist_discovery_rate_by_gender/{}'.format(user),delimiter=',')[:max_length]
+            data = np.loadtxt(rootdir+'{}'.format(user),delimiter=',')[:max_length]
         except IOError:
             continue
         data = np.pad(data,(0,max_length-len(data)),mode='constant',constant_values=[np.nan])
