@@ -47,6 +47,13 @@ class gender_stuff(object):
             fout.write(','.join(output[window_size-1:].fillna('').values.astype(str))+'\n')
         self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
 
+    def rolling_artist_diversity(self,window_size=100):
+        output = df['artist_id'].rolling(window=100).aggregate(lambda x: len(set(x))/float(len(x)))
+        with open(self.args.resultdir+self.user,'w') as fout:
+            fout.write(','.join(output.values.astype(str))+'\n')
+        self.rootLogger.info('User {} processed successfully ({})'.format(self.user,self.filename))
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("Need to add some more documentation")
@@ -57,6 +64,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     g = gender_stuff(args)
-    g.rolling_new_artist_mean()
+    #g.rolling_new_artist_mean()
+    g.rolling_artist_diversity()
 
 
