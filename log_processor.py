@@ -28,7 +28,7 @@ for fi in files:
 with open(jobfile) as fin, open(jobfile+'.partial','w') as fout:
     for line in fin:
         line = line.strip()
-        break
+
         if line[line.rfind('/'):] in done or line[line.rfind('/')+1:] in done:
             continue
         else:
