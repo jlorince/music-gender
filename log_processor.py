@@ -18,7 +18,10 @@ for fi in files:
         for line in fin:
             if keyword in line:
                 filename = line.strip().split()[-1]
-                done.add(filename[filename.rfind('/'):-1])
+                if '/' in filename:
+                    done.add(filename[filename.rfind('/'):-1])
+                else:
+                    done.add(filename[1:-1])
 
 with open(jobfile) as fin, open(jobfile+'.partial','w') as fout:
     for line in fin:
