@@ -7,7 +7,7 @@ import sys
 gender_mapping = pd.read_table('/N/u/jlorince/BigRed2/gender-mapping.txt',header=None,names=['user','gender'])
 rootdir = sys.argv[1]
 if len(sys.argv)>2:
-    gender_to_process = (sys.argb[2],)
+    gender_to_process = (sys.argv[2],)
 else:
     gender_to_process = ('f','m')
 #rootdir = '/N/dc2/scratch/jlorince/new_artist_discovery_rate_by_gender/'
