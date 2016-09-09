@@ -6,6 +6,10 @@ import sys
 
 gender_mapping = pd.read_table('/N/u/jlorince/BigRed2/gender-mapping.txt',header=None,names=['user','gender'])
 rootdir = sys.argv[1]
+if len(sys.argv)>2:
+    gender_to_process = (sys.argb[2],)
+else:
+    gender_to_process = ('f','m')
 #rootdir = '/N/dc2/scratch/jlorince/new_artist_discovery_rate_by_gender/'
 #rootdir = '/N/dc2/scratch/jlorince/simple_artist_diversity_by_gender/'
 
@@ -33,7 +37,7 @@ for gender in ('m','f'):
 
 # now pad and generate our means and CIs
 
-for gender in ('f','m'):
+for gender in gender_to_process:
     total = 0
 
     #mx = vars()['mx_{}'.format(gender)]
