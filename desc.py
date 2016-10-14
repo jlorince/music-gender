@@ -36,7 +36,7 @@ if __name__ == '__main__':
     func_name = sys.argv[1]
     func = func_dict.get(func_name)
     
-    if not f:
+    if func is None:
         raise("Must specify a valid function")
 
 
