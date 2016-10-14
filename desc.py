@@ -21,6 +21,20 @@ def unique_artists_norm(fi):
     df =  parse_df(fi)
     return len(df['artist_id'].unique()) / float(len(df))
 
+"""
+Normalized number of unique songs (n_unique_songs / n_listens)
+"""
+def unique_songs_norm(fi):
+    df =  parse_df(fi)
+    return len(df['song_id'].unique()) / float(len(df))
+
+"""
+Time on site (timestamp of final listen - timestamp of first listen)
+"""
+def total_time(fi):
+    df =  parse_df(fi,include_time = True)
+    return (df.iloc[-1]['ts']-df.iloc[0]['ts']).total_seconds() / 86400.
+
 
 if __name__ == '__main__':
 
@@ -32,7 +46,7 @@ if __name__ == '__main__':
     pool = mp.Pool(mp.cpu_count())
 
     ### WRAPPER
-    func_dict = {'unique_artists_norm':unique_artists_norm}
+    func_dict = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
     func_name = sys.argv[1]
     func = func_dict.get(func_name)
     
