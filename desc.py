@@ -1,5 +1,8 @@
-from pathos import multiprocessing as mp
+#from pathos import multiprocessing as mp
+#from pathos.multiprocessing import ProcessingPool as pool
+import multiprocessing as mp
 from glob import glob
+import pandas as pd
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -41,4 +44,18 @@ def unique_artists_norm(fi):
     return len(df['artist_id'].unique())
 
 
-pool 
+if __name__ == '__main__':
+    import sys
+    p = pool(4)
+
+    ### WRAPPER
+    func_dict = {'unique_artists_norm':unique_artists_norm}
+    func = sys.argv[1]
+    f = func_dict.get(g)
+    
+    if not f:
+        raise("Must specify a valid function")
+
+    print p.map(f,files_f[:10])
+    p.close()
+
