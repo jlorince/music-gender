@@ -46,7 +46,7 @@ def unique_artists_norm(fi):
 
 if __name__ == '__main__':
     import sys
-    pool = mp.pool(4)
+    pool = mp.Pool(4)
 
     ### WRAPPER
     func_dict = {'unique_artists_norm':unique_artists_norm}
