@@ -41,12 +41,12 @@ Normalized number of unique artists (n_unique_artists / n_listens)
 """
 def unique_artists_norm(fi):
     df =  parse_df(fi)
-    return len(df['artist_id'].unique())
+    return len(df['artist_id'].unique()) / float(len(df))
 
 
 if __name__ == '__main__':
     import sys
-    pool = mp.Pool(4)
+    pool = mp.Pool(mp.cpu_count())
 
     ### WRAPPER
     func_dict = {'unique_artists_norm':unique_artists_norm}
@@ -56,6 +56,11 @@ if __name__ == '__main__':
     if not f:
         raise("Must specify a valid function")
 
-    print pool.map(f,files_f[:10])
+
+    for gender in ('m','f'):
+        result = pool.map(f,vars()['files_{}'.format(gender)])
+        with open('data/{}_{}'.format(func,gender),'w') as fout:
+            fout.write('\n'.join(result))
+
     pool.close()
 
