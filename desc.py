@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     for gender in ('m','f'):
         result = pool.map(f,vars()['files_{}'.format(gender)])
-        with open('data/{}_{}'.format(func,gender),'w') as fout:
+        with open('results/{}_{}'.format(func,gender),'w') as fout:
             fout.write('\n'.join(result))
 
     pool.close()
