@@ -27,6 +27,7 @@ if __name__ == '__main__':
     import sys
     import multiprocessing as mp
     from glob import glob
+    import numpy as np
     
     pool = mp.Pool(mp.cpu_count())
 
