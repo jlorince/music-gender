@@ -8,24 +8,6 @@ import pandas as pd
 filter_gender = ['m','f']
 filter_playcount = 1000
 
-
-### METADATA HANDLING
-user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
-
-user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
-user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
-
-filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
-
-ids_f = set(filtered[filtered['gender']=='f']['user_id'].astype(str))
-ids_m = set(filtered[filtered['gender']=='m']['user_id'].astype(str))
-
-
-files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
-
-files_m = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m]
-files_f = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f]
-
 ### SUPPORT FUNCTIONS
 
 def parse_df(fi,include_time=False):
@@ -45,6 +27,7 @@ def unique_artists_norm(fi):
 
 
 if __name__ == '__main__':
+
     import sys
     pool = mp.Pool(mp.cpu_count())
 
@@ -57,6 +40,24 @@ if __name__ == '__main__':
         raise("Must specify a valid function")
 
 
+    ### METADATA HANDLING
+    user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
+
+    user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
+    user_data['sample_playcount'] = user_data['sample_playcount'].copy().astype(int)
+
+    filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
+
+    ids_f = set(filtered[filtered['gender']=='f']['user_id'].astype(str))
+    ids_m = set(filtered[filtered['gender']=='m']['user_id'].astype(str))
+
+
+    files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
+
+    files_m = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m]
+    files_f = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f]
+
+    ### RUN MAIN PROCESSING
     for gender in ('m','f'):
         result = pool.map(f,vars()['files_{}'.format(gender)])
         with open('results/{}_{}'.format(func,gender),'w') as fout:
