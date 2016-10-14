@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ### WRAPPER
     func_dict = {'unique_artists_norm':unique_artists_norm}
     func = sys.argv[1]
-    f = func_dict.get(g)
+    f = func_dict.get(func)
     
     if not f:
         raise("Must specify a valid function")
