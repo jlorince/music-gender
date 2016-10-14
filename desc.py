@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     ### WRAPPER
     func_dict = {'unique_artists_norm':unique_artists_norm}
-    func = sys.argv[1]
-    f = func_dict.get(func)
+    func_name = sys.argv[1]
+    func = func_dict.get(func_name)
     
     if not f:
         raise("Must specify a valid function")
@@ -59,8 +59,8 @@ if __name__ == '__main__':
 
     ### RUN MAIN PROCESSING
     for gender in ('m','f'):
-        result = np.array(pool.map(f,vars()['files_{}'.format(gender)]),dtype=str)
-        with open('results/{}_{}'.format(func,gender),'w') as fout:
+        result = np.array(pool.map(func,vars()['files_{}'.format(gender)]),dtype=str)
+        with open('results/{}_{}'.format(func_name,gender),'w') as fout:
             fout.write('\n'.join(result))
 
     pool.close()
