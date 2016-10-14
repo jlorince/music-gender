@@ -1,7 +1,3 @@
-#from pathos import multiprocessing as mp
-#from pathos.multiprocessing import ProcessingPool as pool
-import multiprocessing as mp
-from glob import glob
 import pandas as pd
 
 ### FILTERS
@@ -29,6 +25,9 @@ def unique_artists_norm(fi):
 if __name__ == '__main__':
 
     import sys
+    import multiprocessing as mp
+    from glob import glob
+    
     pool = mp.Pool(mp.cpu_count())
 
     ### WRAPPER
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
 
     user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
-    user_data['sample_playcount'] = user_data['sample_playcount'].copy().astype(int)
+    user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
 
     filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
 
@@ -59,9 +58,16 @@ if __name__ == '__main__':
 
     ### RUN MAIN PROCESSING
     for gender in ('m','f'):
-        result = pool.map(f,vars()['files_{}'.format(gender)])
+        result = np.array(pool.map(f,vars()['files_{}'.format(gender)]),dtype=str)
         with open('results/{}_{}'.format(func,gender),'w') as fout:
             fout.write('\n'.join(result))
 
     pool.close()
 
+
+    # result_f = pool.map(f,files_f)
+    # with open('results/{}_f'.format(func),'w') as fout:
+    #     fout.write('\n'.join(result_f))
+    # result_m = pool.map(f,files_m)
+    # with open('results/{}_m'.format(func),'w') as fout:
+    #     fout.write('\n'.join(result_m))
