@@ -46,7 +46,7 @@ def unique_artists_norm(fi):
 
 if __name__ == '__main__':
     import sys
-    p = pool(4)
+    pool = mp.pool(4)
 
     ### WRAPPER
     func_dict = {'unique_artists_norm':unique_artists_norm}
@@ -56,6 +56,6 @@ if __name__ == '__main__':
     if not f:
         raise("Must specify a valid function")
 
-    print p.map(f,files_f[:10])
-    p.close()
+    print pool.map(f,files_f[:10])
+    pool.close()
 
