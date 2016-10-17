@@ -53,7 +53,7 @@ if __name__ == '__main__':
     from glob import glob
     import numpy as np
     import math
-    import datetime
+    import time,datetime
     
     n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
