@@ -53,6 +53,7 @@ if __name__ == '__main__':
     from glob import glob
     import numpy as np
     import math
+    import datetime
     
     n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
@@ -100,6 +101,7 @@ if __name__ == '__main__':
     
     elif func_name in func_dict_series_mean:
         for gender in ('m','f'):
+            start = time.time()
             files = vars()['files_{}'.format(gender)]
             total_files = len(files)
             chunksize = int(math.ceil(total_files / float(n_procs)))
@@ -111,26 +113,26 @@ if __name__ == '__main__':
             M2 = np.zeros(0,dtype=float)
 
             for result in pool.imap_unordered(func,files,chunksize=chunksize):
-                n = len(result)
-                if n>max_length:
-                    n = np.pad(n,(0,n-max_length),mode='constant',constant_values=0.)
-                    mean = np.pad(mean,(0,n-max_length),mode='constant',constant_values=0.)
-                    M2 = np.pad(M2,(0,n-max_length),mode='constant',constant_values=0.)
+                l = len(result)
+                if l>max_length:
+                    n = np.pad(n,(0,l-max_length),mode='constant',constant_values=0.)
+                    mean = np.pad(mean,(0,l-max_length),mode='constant',constant_values=0.)
+                    M2 = np.pad(M2,(0,l-max_length),mode='constant',constant_values=0.)
                     current = result
-                    max_length = n
+                    max_length = l
 
                 else:
                     current = np.pad(result,(0,max_length-n),mode='constant',constant_values=[np.nan])
 
                 mask = np.where(~np.isnan(current))
                 n[mask]+=1
-                delta = (data-mean)[mask]
+                delta = (current-mean)[mask]
                 mean[mask] += delta/n[mask]
-                M2[mask] += delta*(data-mean)[mask]
+                M2[mask] += delta*(current-mean)[mask]
                 total += 1
                 print "{}/{} files processed ({})".format(total,total_files,gender)
 
-                print "Stats done: {} ({})".format(gender,total)
+            print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
 
             std = np.sqrt(M2 / (n - 1))
             np.savez('results/{}_{}.npz'.format(func_name,gender),mean=mean,std=std,n=n)
