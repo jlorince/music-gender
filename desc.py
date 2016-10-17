@@ -59,12 +59,13 @@ if __name__ == '__main__':
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
     func_dict_series_mean = {'artist_dist':artist_dist}
-    #default_max_lengths = {'artist_dist'}
+    combined = func_dict_single_value.copy()
+    combined.update(func_dict_series_mean)
     
     func_name = sys.argv[1]
     if len(sys.argv)>2:
         extra_args = sys.argv[2:]
-    func = func_dict.get(func_name)
+    func = combined.get(func_name)
     
     if func is None:
         raise("Must specify a valid function")
