@@ -52,6 +52,7 @@ if __name__ == '__main__':
     import multiprocessing as mp
     from glob import glob
     import numpy as np
+    import math
     
     n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
