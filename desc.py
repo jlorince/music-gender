@@ -99,7 +99,8 @@ if __name__ == '__main__':
     elif func_name in func_series_mean:
         for gender in ('m','f'):
             files = vars()['files_{}'.format(gender)]
-            chunksize = int(math.ceil(len(files) / float(n_procs)))
+            total_files = len(files)
+            chunksize = int(math.ceil(total_files / float(n_procs)))
             total = 0
             max_length = 0
 
@@ -125,6 +126,7 @@ if __name__ == '__main__':
                 mean[mask] += delta/n[mask]
                 M2[mask] += delta*(data-mean)[mask]
                 total += 1
+                print "{}/{} files processed ({})".format(total,total_files,gender)
 
                 print "Stats done: {} ({})".format(gender,total)
 
