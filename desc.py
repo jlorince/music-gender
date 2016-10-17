@@ -35,6 +35,16 @@ def total_time(fi):
     df =  parse_df(fi,include_time = True)
     return (df.iloc[-1]['ts']-df.iloc[0]['ts']).total_seconds() / 86400.
 
+"""
+Artist listening distribution (propotion of listening allocated to most-listened, second-most-listend, etc. artists )
+"""
+def artist_dist(fi):
+    df = parse_df(fi)
+    result = df['artist_id'].value_counts() / float(len(df))
+    return result.values
+
+
+
 
 if __name__ == '__main__':
 
@@ -43,11 +53,17 @@ if __name__ == '__main__':
     from glob import glob
     import numpy as np
     
-    pool = mp.Pool(mp.cpu_count())
+    n_procs = mp.cpu_count()
+    pool = mp.Pool(n_procs)
 
     ### WRAPPER
-    func_dict = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
+    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
+    func_dict_series_mean = {'artist_dist':artist_dist}
+    #default_max_lengths = {'artist_dist'}
+    
     func_name = sys.argv[1]
+    if len(sys.argv)>2:
+        extra_args = sys.argv[2:]
     func = func_dict.get(func_name)
     
     if func is None:
@@ -72,10 +88,48 @@ if __name__ == '__main__':
     files_f = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f]
 
     ### RUN MAIN PROCESSING
-    for gender in ('m','f'):
-        result = np.array(pool.map(func,vars()['files_{}'.format(gender)]),dtype=str)
-        with open('results/{}_{}'.format(func_name,gender),'w') as fout:
-            fout.write('\n'.join(result))
+    if func_name in func_dict_single_value:
+        for gender in ('m','f'):
+            files = vars()['files_{}'.format(gender)]
+            chunksize = int(math.ceil(len(files) / float(n_procs)))
+            result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
+            with open('results/{}_{}'.format(func_name,gender),'w') as fout:
+                fout.write('\n'.join(result))
+    
+    elif func_name in func_series_mean:
+        for gender in ('m','f'):
+            files = vars()['files_{}'.format(gender)]
+            chunksize = int(math.ceil(len(files) / float(n_procs)))
+            total = 0
+            max_length = 0
+
+            n = np.zeros(0,dtype=float)
+            mean = np.zeros(0,dtype=float)
+            M2 = np.zeros(0,dtype=float)
+
+            for result in pool.imap_unordered(func,files,chunksize=chunksize):
+                n = len(result)
+                if n>max_length:
+                    n = np.pad(n,(0,n-max_length),mode='constant',constant_values=0.)
+                    mean = np.pad(mean,(0,n-max_length),mode='constant',constant_values=0.)
+                    M2 = np.pad(M2,(0,n-max_length),mode='constant',constant_values=0.)
+                    current = result
+                    max_length = n
+
+                else:
+                    current = np.pad(result,(0,max_length-n),mode='constant',constant_values=[np.nan])
+
+                mask = np.where(~np.isnan(current))
+                n[mask]+=1
+                delta = (data-mean)[mask]
+                mean[mask] += delta/n[mask]
+                M2[mask] += delta*(data-mean)[mask]
+                total += 1
+
+                print "Stats done: {} ({})".format(gender,total)
+
+            std = np.sqrt(M2 / (n - 1))
+            np.savez('results/{}_{}.npz'.format(func_name,gender),mean=mean,std=std,n=n)
 
     pool.close()
 
