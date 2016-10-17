@@ -97,7 +97,7 @@ if __name__ == '__main__':
             with open('results/{}_{}'.format(func_name,gender),'w') as fout:
                 fout.write('\n'.join(result))
     
-    elif func_name in func_series_mean:
+    elif func_name in func_dict_series_mean:
         for gender in ('m','f'):
             files = vars()['files_{}'.format(gender)]
             total_files = len(files)
