@@ -43,6 +43,33 @@ def artist_dist(fi):
     result = df['artist_id'].value_counts() / float(len(df))
     return result.values
 
+"""
+New artist encounter: For each scrobble, is this the user's first time listening to that ARTIST?
+"""
+def new_artist(fi):
+    df = parse_df(fi)
+    result = []
+    encountered = set()
+    for a in df['artist_id']:
+        if a not in encountered:
+            result.append(1)
+        else:
+            result.append(0)
+    return np.array(result)
+
+"""
+New song encounter: For each scrobble, is this the user's first time listening to that SONG?
+"""
+def new_song(fi):
+    df = parse_df(fi)
+    result = []
+    encountered = set()
+    for a in df['song_id']:
+        if a not in encountered:
+            result.append(1)
+        else:
+            result.append(0)
+    return np.array(result)
 
 
 
@@ -60,7 +87,7 @@ if __name__ == '__main__':
 
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
-    func_dict_series_mean = {'artist_dist':artist_dist}
+    func_dict_series_mean = {'artist_dist':artist_dist,'new_song':new_song,'new_artist':new_artist}
     combined = func_dict_single_value.copy()
     combined.update(func_dict_series_mean)
     
