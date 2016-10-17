@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 ### FILTERS
 filter_gender = ['m','f']
