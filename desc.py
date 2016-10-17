@@ -39,7 +39,7 @@ def total_time(fi):
 """
 Artist listening distribution (propotion of listening allocated to most-listened, second-most-listend, etc. artists )
 """
-def artist_dist(fi):
+def artist_rank_dist(fi):
     df = parse_df(fi)
     result = df['artist_id'].value_counts() / float(len(df))
     return result.values
@@ -54,6 +54,7 @@ def new_artist(fi):
     for a in df['artist_id']:
         if a not in encountered:
             result.append(1)
+            encountered.add(a)
         else:
             result.append(0)
     return np.array(result)
@@ -65,9 +66,10 @@ def new_song(fi):
     df = parse_df(fi)
     result = []
     encountered = set()
-    for a in df['song_id']:
-        if a not in encountered:
+    for s in df['song_id']:
+        if s not in encountered:
             result.append(1)
+            encountered.add(s)
         else:
             result.append(0)
     return np.array(result,dtype=float)
@@ -88,7 +90,7 @@ if __name__ == '__main__':
 
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
-    func_dict_series_mean = {'artist_dist':artist_dist,'new_song':new_song,'new_artist':new_artist}
+    func_dict_series_mean = {'artist_rank_dist':artist_rank_dist,'new_song':new_song,'new_artist':new_artist}
     combined = func_dict_single_value.copy()
     combined.update(func_dict_series_mean)
     
