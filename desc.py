@@ -79,9 +79,9 @@ if __name__ == '__main__':
     import sys
     import multiprocessing as mp
     from glob import glob
-    import numpy as np
     import math
     import time,datetime
+    import os
     
     n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
     files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
 
-    files_m = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m]
-    files_f = [f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f]
+    files_m = sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m],key=os.path.getsize,reverse=True)
+    files_f = sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f],key=os.path.getsize,reverse=True)
 
     ### RUN MAIN PROCESSING
     if func_name in func_dict_single_value:
