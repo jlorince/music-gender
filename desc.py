@@ -122,7 +122,7 @@ if __name__ == '__main__':
                     max_length = l
 
                 else:
-                    current = np.pad(result,(0,max_length-n),mode='constant',constant_values=[np.nan])
+                    current = np.pad(result,(0,max_length-l),mode='constant',constant_values=[np.nan])
 
                 mask = np.where(~np.isnan(current))
                 n[mask]+=1
