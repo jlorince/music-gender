@@ -70,7 +70,7 @@ def new_song(fi):
             result.append(1)
         else:
             result.append(0)
-    return np.array(result)
+    return np.array(result,dtype=float)
 
 
 
