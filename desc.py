@@ -57,7 +57,7 @@ def new_artist(fi):
             encountered.add(a)
         else:
             result.append(0)
-    return np.array(result)
+    return np.array(result,dtype=float)
 
 """
 New song encounter: For each scrobble, is this the user's first time listening to that SONG?
