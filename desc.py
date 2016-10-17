@@ -97,7 +97,7 @@ def gini_songs(fi):
 """
 Gini coefficient (over artists)
 """
-def gini_songs(fi):
+def gini_artists(fi):
     df = parse_df(fi)
     return gini(df['artist_id'].value_counts().values.astype(float))
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     pool = mp.Pool(n_procs)
 
     ### WRAPPER
-    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time}
+    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists}
     func_dict_series_mean = {'artist_rank_dist':artist_rank_dist,'new_song':new_song,'new_artist':new_artist}
     combined = func_dict_single_value.copy()
     combined.update(func_dict_series_mean)
