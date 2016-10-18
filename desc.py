@@ -110,7 +110,7 @@ def gini_artists(fi):
 
 def distance_based_diversity(fi):
     df = parse_df(fi)
-    unique_artists = df['artist_id'].unique().values
+    unique_artists = df['artist_id'].unique()
     indices = mapping.ix[unique_artists].dropna()['idx'].values.astype(int)
     feature_arr = features[indices]
     distances = pdist(feature_arr,metric='cosine')
