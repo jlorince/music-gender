@@ -28,8 +28,8 @@ def gini(array):
     return ((np.sum((2 * index - n  - 1) * array)) / (n * np.sum(array))) #Gini coefficient
 
 ### SUPPORT DATA  -- > Need to figure out how to only load this when we need it...
-features = np.load('P:/Projects/BigMusic/jared/artist-features-w2v-400-15.npy')
-mapping = pd.read_pickle('P:/Projects/BigMusic/jared/artist-map-w2v-200-15.pkl').set_index('id')
+features = np.load('P:/Projects/BigMusic/jared.data/artist-features-w2v-400-15.npy')
+mapping = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').set_index('id')
 
 
 ### ANALYSIS FUNCTIONS
