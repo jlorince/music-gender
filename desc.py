@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy.spatial.distance import pdist
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -25,6 +26,11 @@ def gini(array):
     index = np.arange(1,array.shape[0]+1) #index per array element
     n = array.shape[0]#number of array elements
     return ((np.sum((2 * index - n  - 1) * array)) / (n * np.sum(array))) #Gini coefficient
+
+### SUPPORT DATA  -- > Need to figure out how to only load this when we need it...
+features = np.load('P:/Projects/BigMusic/jared/artist-features-w2v-400-15.npy')
+mapping = pd.read_pickle('P:/Projects/BigMusic/jared/artist-map-w2v-200-15.pkl').set_index('id')
+
 
 ### ANALYSIS FUNCTIONS
 
@@ -102,7 +108,13 @@ def gini_artists(fi):
     return gini(df['artist_id'].value_counts().values.astype(float))
 
 
-
+def distance_based_diversity(fi):
+    df = parse_df(fi)
+    unique_artists = df['artist_id'].unique().values
+    indices = mapping.ix[unique_artists].dropna()['idx'].values.astype(int)
+    feature_arr = features[indices]
+    distances = pdist(feature_arr,metric='cosine')
+    return np.mean(distances)
 
 
 if __name__ == '__main__':
@@ -118,7 +130,7 @@ if __name__ == '__main__':
     pool = mp.Pool(n_procs)
 
     ### WRAPPER
-    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists}
+    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'distance_based_diversity':distance_based_diversity}
     func_dict_series_mean = {'artist_rank_dist':artist_rank_dist,'new_song':new_song,'new_artist':new_artist}
     combined = func_dict_single_value.copy()
     combined.update(func_dict_series_mean)
