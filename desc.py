@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from scipy.spatial.distance import pdist
+import time
+from os.path import basename
+import pickle
+import datetime
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -28,8 +32,10 @@ def gini(array):
     return ((np.sum((2 * index - n  - 1) * array)) / (n * np.sum(array))) #Gini coefficient
 
 ### SUPPORT DATA  -- > Need to figure out how to only load this when we need it...
-features = np.load('P:/Projects/BigMusic/jared.data/artist-features-w2v-400-15.npy')
-mapping = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').set_index('id')
+#features = np.load('P:/Projects/BigMusic/jared.data/artist-features-w2v-400-15.npy')
+#mapping = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').set_index('id')
+distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
+idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
 
 
 ### ANALYSIS FUNCTIONS
@@ -107,14 +113,35 @@ def gini_artists(fi):
     df = parse_df(fi)
     return gini(df['artist_id'].value_counts().values.astype(float))
 
+"""
+Calculate distance-based diversity on a user's set of unique artists
+"""
 
-def distance_based_diversity(fi):
+def artist_diversity(fi):
+    start = time.time()
     df = parse_df(fi)
     unique_artists = df['artist_id'].unique()
     indices = mapping.ix[unique_artists].dropna()['idx'].values.astype(int)
     feature_arr = features[indices]
     distances = pdist(feature_arr,metric='cosine')
+    print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
     return np.mean(distances)
+
+"""
+Calculate distance-based diversity on all of a user's listens
+"""
+def diversity(fi):
+    start = time.time()
+    df = parse_df(fi)
+    df['idx'] = df['artist_id'].apply(lambda x: idx_dict.get(x))
+    df = df.dropna()
+    artist_counts = df['idx'].value_counts().sort_index()
+    n = len(df)
+    result = ((artist_counts.values[:,None]*artist_counts.values) * distance_matrix[artist_counts.index.values][:,artist_counts.index.values]).sum() / float((n*n-1))
+    print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
+    return result
+
+
 
 
 if __name__ == '__main__':
@@ -126,11 +153,8 @@ if __name__ == '__main__':
     import time,datetime
     import os
     
-    n_procs = mp.cpu_count()
-    pool = mp.Pool(n_procs)
-
     ### WRAPPER
-    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'distance_based_diversity':distance_based_diversity}
+    func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'artist_diversity':artist_diversity,'diversity':diversity}
     func_dict_series_mean = {'artist_rank_dist':artist_rank_dist,'new_song':new_song,'new_artist':new_artist}
     combined = func_dict_single_value.copy()
     combined.update(func_dict_series_mean)
@@ -142,6 +166,12 @@ if __name__ == '__main__':
     
     if func is None:
         raise("Must specify a valid function")
+
+    if func == 'diversity':
+        n_procs = 24
+    else:
+        n_procs = mp.cpu_count()
+    pool = mp.Pool(n_procs)
 
 
     ### METADATA HANDLING
@@ -164,11 +194,13 @@ if __name__ == '__main__':
     ### RUN MAIN PROCESSING
     if func_name in func_dict_single_value:
         for gender in ('m','f'):
+            start = time.time()
             files = vars()['files_{}'.format(gender)]
             chunksize = int(math.ceil(len(files) / float(n_procs)))
             result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
             with open('results/{}_{}'.format(func_name,gender),'w') as fout:
                 fout.write('\n'.join(result))
+            print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
     
     elif func_name in func_dict_series_mean:
         for gender in ('m','f'):
