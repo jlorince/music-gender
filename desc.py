@@ -137,7 +137,7 @@ def diversity(fi):
     df = df.dropna()
     artist_counts = df['idx'].value_counts().sort_index()
     n = len(df)
-    result = ((artist_counts.values[:,None]*artist_counts.values) * distance_matrix[artist_counts.index.values][:,artist_counts.index.values]).sum() / float((n*n-1))
+    result = ((artist_counts.values[:,None]*artist_counts.values) * distance_matrix[artist_counts.index.values][:,artist_counts.index.values]).sum() / float(n*(n-1))
     print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
     return result
 
