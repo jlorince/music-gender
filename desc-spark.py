@@ -5,6 +5,11 @@ import time
 from os.path import basename
 import pickle
 import datetime
+from glob import glob
+"""
+set HADOOP_HOME=U:\Users\jjl2228\hadoop
+set PYSPARK_DRIVER_PYTHON="ipython"
+"""
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -18,119 +23,17 @@ def parse_df(fi,include_time=False):
     else:
         return pd.read_table(fi,header=None,names=['song_id','artist_id','ts'],usecols=['song_id','artist_id'])
 
-def gini(array):
-    """Calculate the Gini coefficient of a numpy array."""
-    # based on bottom eq: http://www.statsdirect.com/help/content/image/stat0206_wmf.gif
-    # from: http://www.statsdirect.com/help/default.htm#nonparametric_methods/gini.htm
-    array = array.flatten() #all values are treated equally, arrays must be 1d
-    if np.amin(array) < 0:
-        array -= np.amin(array) #values cannot be negative
-    array += 0.0000001 #values cannot be 0
-    array = np.sort(array) #values must be sorted
-    index = np.arange(1,array.shape[0]+1) #index per array element
-    n = array.shape[0]#number of array elements
-    return ((np.sum((2 * index - n  - 1) * array)) / (n * np.sum(array))) #Gini coefficient
 
-### SUPPORT DATA  -- > Need to figure out how to only load this when we need it...
-#features = np.load('P:/Projects/BigMusic/jared.data/artist-features-w2v-400-15.npy')
-#mapping = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').set_index('id')
-
+distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
+idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
 
 
 ### ANALYSIS FUNCTIONS
 
 """
-Normalized number of unique artists (n_unique_artists / n_listens)
-"""
-def unique_artists_norm(fi):
-    df =  parse_df(fi)
-    return len(df['artist_id'].unique()) / float(len(df))
-
-"""
-Normalized number of unique songs (n_unique_songs / n_listens)
-"""
-def unique_songs_norm(fi):
-    df =  parse_df(fi)
-    return len(df['song_id'].unique()) / float(len(df))
-
-"""
-Time on site (timestamp of final listen - timestamp of first listen)
-"""
-def total_time(fi):
-    df =  parse_df(fi,include_time = True)
-    return (df.iloc[-1]['ts']-df.iloc[0]['ts']).total_seconds() / 86400.
-
-"""
-Artist listening distribution (propotion of listening allocated to most-listened, second-most-listend, etc. artists )
-"""
-def artist_rank_dist(fi):
-    df = parse_df(fi)
-    result = df['artist_id'].value_counts() / float(len(df))
-    return result.values
-
-"""
-New artist encounter: For each scrobble, is this the user's first time listening to that ARTIST?
-"""
-def new_artist(fi):
-    df = parse_df(fi)
-    result = []
-    encountered = set()
-    for a in df['artist_id']:
-        if a not in encountered:
-            result.append(1)
-            encountered.add(a)
-        else:
-            result.append(0)
-    return np.array(result,dtype=float)
-
-"""
-New song encounter: For each scrobble, is this the user's first time listening to that SONG?
-"""
-def new_song(fi):
-    df = parse_df(fi)
-    result = []
-    encountered = set()
-    for s in df['song_id']:
-        if s not in encountered:
-            result.append(1)
-            encountered.add(s)
-        else:
-            result.append(0)
-    return np.array(result,dtype=float)
-
-"""
-Gini coefficient (over songs)
-"""
-def gini_songs(fi):
-    df = parse_df(fi)
-    return gini(df['song_id'].value_counts().values.astype(float))
-
-"""
-Gini coefficient (over artists)
-"""
-def gini_artists(fi):
-    df = parse_df(fi)
-    return gini(df['artist_id'].value_counts().values.astype(float))
-
-"""
-Calculate distance-based diversity on a user's set of unique artists
-"""
-
-def artist_diversity(fi):
-    start = time.time()
-    df = parse_df(fi)
-    unique_artists = df['artist_id'].unique()
-    indices = mapping.ix[unique_artists].dropna()['idx'].values.astype(int)
-    feature_arr = features[indices]
-    distances = pdist(feature_arr,metric='cosine')
-    print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
-    return np.mean(distances)
-
-"""
 Calculate distance-based diversity on all of a user's listens
 """
-def diversity(input_tuple):
-    fi,dist_dict = input_tuple
+def diversity(fi):
     start = time.time()
     df = parse_df(fi)
     df['idx'] = df['artist_id'].apply(lambda x: idx_dict.get(x))
@@ -145,6 +48,27 @@ def diversity(input_tuple):
     print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
     return result
 
+
+### METADATA HANDLING
+user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
+
+user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
+user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
+
+filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
+
+ids_f = set(filtered[filtered['gender']=='f']['user_id'].astype(str))
+ids_m = set(filtered[filtered['gender']=='m']['user_id'].astype(str))
+
+
+files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
+
+files_m = sc.parallelize(sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m],key=os.path.getsize,reverse=True)[:10])
+files_f = sc.parallelize(sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f],key=os.path.getsize,reverse=True)[:10])
+
+start = time.time()
+result_m = files_m.map(diversity).collect()
+print str(datetime.timedelta(seconds=(time.time()-start)))
 
 
 
@@ -171,10 +95,10 @@ if __name__ == '__main__':
     if func is None:
         raise("Must specify a valid function")
 
-    # if func_name == 'diversity':
-    #     n_procs = 12
-    # else:
-    #     n_procs = mp.cpu_count()
+    if func_name == 'diversity':
+        n_procs = 12
+    else:
+        n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
 
 
@@ -201,16 +125,7 @@ if __name__ == '__main__':
             start = time.time()
             files = vars()['files_{}'.format(gender)]
             chunksize = int(math.ceil(len(files) / float(n_procs)))
-
-            if func_name == 'diversity':
-                distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
-                idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
-                m = mp.Manager()
-                d = m.dict({i:distance_matrix[i] for i in rang(len(distance_matrix))})
-                result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d))))
-            else:
-                result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
-                
+            result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
             with open('results/{}_{}'.format(func_name,gender),'w') as fout:
                 fout.write('\n'.join(result))
             print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
