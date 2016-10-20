@@ -5,6 +5,7 @@ import time
 from os.path import basename
 import pickle
 import datetime
+import multiprocessing as mp
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -151,11 +152,11 @@ def diversity(input_tuple):
 if __name__ == '__main__':
 
     import sys
-    import multiprocessing as mp
     from glob import glob
     import math
     import time,datetime
     import os
+    import itertools
     
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'artist_diversity':artist_diversity,'diversity':diversity}
@@ -204,13 +205,15 @@ if __name__ == '__main__':
 
             if func_name == 'diversity':
                 distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
-                idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
+                #idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
                 m = mp.Manager()
-                d = m.dict({i:distance_matrix[i] for i in rang(len(distance_matrix))})
-                result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d))))
+                d = m.dict({i:distance_matrix[i] for i in rang(len(distance_matrix))},lock=False)
+                idx_dict = m.dict(pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k')),lock=False)
+                del distance_matrix
+                result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx_dict)),chunksize=chunksize),dtype=str)
             else:
                 result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
-                
+
             with open('results/{}_{}'.format(func_name,gender),'w') as fout:
                 fout.write('\n'.join(result))
             print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
