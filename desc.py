@@ -175,7 +175,7 @@ if __name__ == '__main__':
     # if func_name == 'diversity':
     #     n_procs = 12
     # else:
-    #     n_procs = mp.cpu_count()
+    n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
 
 
