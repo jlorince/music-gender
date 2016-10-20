@@ -6,6 +6,7 @@ from os.path import basename
 import pickle
 import datetime
 import multiprocessing as mp
+import empty_module
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -31,6 +32,10 @@ def gini(array):
     index = np.arange(1,array.shape[0]+1) #index per array element
     n = array.shape[0]#number of array elements
     return ((np.sum((2 * index - n  - 1) * array)) / (n * np.sum(array))) #Gini coefficient
+
+
+def initProcess(share):
+    empty_module.d = share
 
 ### SUPPORT DATA  -- > Need to figure out how to only load this when we need it...
 #features = np.load('P:/Projects/BigMusic/jared.data/artist-features-w2v-400-15.npy')
@@ -131,18 +136,22 @@ def artist_diversity(fi):
 Calculate distance-based diversity on all of a user's listens
 """
 def diversity(input_tuple):
-    fi,dist_dict = input_tuple
+    #fi,dist_dict,idx_dict = input_tuple
+    fi,idx_dict = input_tuple
     start = time.time()
     df = parse_df(fi)
     df['idx'] = df['artist_id'].apply(lambda x: idx_dict.get(x))
     df = df.dropna()
+    if len(df)==0:
+        return None
     df['idx'] = df['idx'].astype(int)
     artist_counts = df['idx'].value_counts().sort_index()
     n = len(df)
     count_arr = artist_counts.values
     idx_arr = artist_counts.index.values
-    #result = ((count_arr[:,None]*count_arr.values) * distance_matrix[idx_arr][:,idx_arr]).sum() / float(n*(n-1))
-    result = ((count_arr[:,None]*count_arr.values) * np.array(dist_dict[i][idx_arr] for i in idx_arr)).sum() / float(n*(n-1))
+    #result = ((count_arr[:,None]*count_arr) * distance_matrix[idx_arr][:,idx_arr]).sum() / float(n*(n-1))
+    #result = ((count_arr[:,None]*count_arr) * np.array([dist_dict[i][idx_arr] for i in idx_arr])).sum() / float(n*(n-1))
+    result = ((count_arr[:,None]*count_arr) * np.array([np.array(empty_module.d[i])[idx_arr] for i in idx_arr])).sum() / float(n*(n-1))
     print "User {} done ({})".format(basename(fi),str(datetime.timedelta(seconds=(time.time()-start))))
     return result
 
@@ -176,7 +185,10 @@ if __name__ == '__main__':
     #     n_procs = 12
     # else:
     n_procs = mp.cpu_count()
-    pool = mp.Pool(n_procs)
+    if func_name != 'diversity':
+        pool = mp.Pool(n_procs)
+        
+        
 
 
     ### METADATA HANDLING
@@ -205,12 +217,25 @@ if __name__ == '__main__':
 
             if func_name == 'diversity':
                 distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
+                #distance_matrix = np.random.random((1000,1000))
                 #idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
-                m = mp.Manager()
-                d = m.dict({i:distance_matrix[i] for i in xrange(len(distance_matrix))},lock=False)
-                idx_dict = m.dict(pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k')),lock=False)
+                #m = mp.Manager()
+                #d = m.dict({i:distance_matrix[i] for i in xrange(len(distance_matrix))})
+                d = {}
+                print 'building array dict..'
+                for i in xrange(len(distance_matrix)):
+                    d[i] = mp.Array('d',distance_matrix[i],lock=False)
+                print '...done!'
+
+                #idx_dict = m.dict(pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k')),lock=False)
+                idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
+                #idx_dict = {k:v for k,v in idx_dict.iteritems() if v<1000}
+                #idx = m.dict({k:v for k,v in idx.iteritems() if v<1000})
                 del distance_matrix
-                result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx_dict)),chunksize=chunksize),dtype=str)
+                #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
+                #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
+                pool = mp.Pool(n_procs,initializer=initProcess,initargs=(d,))
+                result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(idx_dict)),chunksize=chunksize),dtype=str)
             else:
                 result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
 
