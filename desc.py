@@ -207,7 +207,7 @@ if __name__ == '__main__':
                 distance_matrix = np.load('P:/Projects/BigMusic/jared.git/music-gender/data/w2v-400-15-distance_matrix-100k.npy')
                 #idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
                 m = mp.Manager()
-                d = m.dict({i:distance_matrix[i] for i in rang(len(distance_matrix))},lock=False)
+                d = m.dict({i:distance_matrix[i] for i in xrange(len(distance_matrix))},lock=False)
                 idx_dict = m.dict(pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k')),lock=False)
                 del distance_matrix
                 result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx_dict)),chunksize=chunksize),dtype=str)
