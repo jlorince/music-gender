@@ -166,6 +166,8 @@ if __name__ == '__main__':
     import time,datetime
     import os
     import itertools
+
+    SAMPLE = True
     
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'artist_diversity':artist_diversity,'diversity':diversity}
@@ -199,14 +201,38 @@ if __name__ == '__main__':
 
     filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
 
-    ids_f = set(filtered[filtered['gender']=='f']['user_id'].astype(str))
-    ids_m = set(filtered[filtered['gender']=='m']['user_id'].astype(str))
+    if SAMPLE:
+        t = int(time.time())
+        np.random.seed(t)
+
+        bins = np.logspace(3,6,num=100,base=10)
+        m = filtered[filtered.gender=='m']
+        f = filtered[filtered.gender=='f']
+        m['bin'] = np.digitize(m['sample_playcount'],bins=bins).astype(int)
+        f['bin'] = np.digitize(f['sample_playcount'],bins=bins).astype(int)
+
+        ids_m = []
+        ids_f = []
+        for b in np.arange(1,101,1):
+            if b in f['bin'].values and b in m['bin'].values:
+                bin_f = f[f.bin==b]
+                bin_m = m[m.bin==b]
+                n_f = len(bin_f)
+                n_m = len(bin_m)
+                if (n_f>=10) and (n_m>=10):
+                    n = int(math.ceil(n_f/2.))
+                    ids_m += list(np.random.choice(bin_m.user_id.values,size=n,replace=False))
+                    ids_f += list(np.random.choice(bin_f.user_id.values,size=n,replace=False))
+           
+    else:
+        ids_f = set(filtered[filtered['gender']=='f']['user_id'])
+        ids_m = set(filtered[filtered['gender']=='m']['user_id'])
 
 
     files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
 
-    files_m = sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_m],key=os.path.getsize,reverse=True)
-    files_f = sorted([f for f in files if f[f.rfind('\\')+1:f.rfind('.')] in ids_f],key=os.path.getsize,reverse=True)
+    files_m = sorted([f for f in files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
+    files_f = sorted([f for f in files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_f],key=os.path.getsize,reverse=True)
 
     ### RUN MAIN PROCESSING
     if func_name in func_dict_single_value:
@@ -279,7 +305,7 @@ if __name__ == '__main__':
             print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
 
             std = np.sqrt(M2 / (n - 1))
-            np.savez('results/{}_{}.npz'.format(func_name,gender),mean=mean,std=std,n=n)
+            np.savez('results/{}_{}{}.npz'.format(func_name,gender,{True:'_SAMPLED'+'-'+str(t),False:""}),mean=mean,std=std,n=n)
 
     pool.close()
 
