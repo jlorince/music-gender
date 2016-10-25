@@ -265,7 +265,7 @@ if __name__ == '__main__':
             else:
                 result = np.array(pool.map(func,files,chunksize=chunksize),dtype=str)
 
-            with open('results/{}_{}'.format(func_name,gender),'w') as fout:
+            with open('results/{}_{}{}'.format(func_name,gender,{True:'_SAMPLED'+'-'+str(t),False:""}[SAMPLE]),'w') as fout:
                 fout.write('\n'.join(result))
             print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
     
@@ -305,7 +305,7 @@ if __name__ == '__main__':
             print "{} stats done ({})".format(gender,str(datetime.timedelta(seconds=(time.time()-start))))
 
             std = np.sqrt(M2 / (n - 1))
-            np.savez('results/{}_{}{}.npz'.format(func_name,gender,{True:'_SAMPLED'+'-'+str(t),False:""}),mean=mean,std=std,n=n)
+            np.savez('results/{}_{}{}.npz'.format(func_name,gender,{True:'_SAMPLED'+'-'+str(t),False:""}[SAMPLE]),mean=mean,std=std,n=n)
 
     pool.close()
 
