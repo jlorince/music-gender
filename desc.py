@@ -199,7 +199,7 @@ if __name__ == '__main__':
     user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
     user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
 
-    filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender']]
+    filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>=filter_playcount)][['user_id','gender','sample_playcount']]
 
     if SAMPLE:
         t = int(time.time())
