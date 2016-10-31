@@ -80,7 +80,7 @@ if __name__=='__main__':
     for i,arr in enumerate(pool.imap_unordered(process,files,chunksize=chunksize)):
         if len(arr)>0:
             mat[i,arr] = 1
-        print i,fi
+        print i
     print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
     print "Generating cooccurrence matrix"
