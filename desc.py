@@ -226,7 +226,7 @@ if __name__ == '__main__':
         del distance_matrix
         #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
         #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
-        buns = np.linspace(0,distance_matrix.max(),101)
+        bins = np.linspace(0,distance_matrix.max(),101)
         pool = mp.Pool(n_procs,initializer=initProcess,initargs=(d,bins))
         
         
