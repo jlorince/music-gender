@@ -78,7 +78,8 @@ if __name__=='__main__':
     print 'Processing files...'
     start = time.time()
     for i,arr in enumerate(pool.imap_unordered(process,files,chunksize=chunksize)):
-        mat[i,arr] = 1
+        if len(arr)>0:
+            mat[i,arr] = 1
         print i,fi
     print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
