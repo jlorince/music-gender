@@ -58,21 +58,34 @@ def process(fi,thresh=10):
 if __name__=='__main__':
     import math
 
+    print 'getting file list...'
+    start = time.time()
     files = sorted(glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*'),key=os.path.getsize,reverse=True)
+    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
+    print 'Initializing pool...'
+    start = time.time()
     n_procs = mp.cpu_count()
     pool = mp.Pool(n_procs)
+    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
+    print 'Initializing matrix...'
+    start = time.time()
     chunksize = int(math.ceil(len(files) / float(n_procs)))
-
     mat = np.zeros((len(files),len(mapping)))
+    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
-    for i,arr in pool.map(process,files,chunksize=chunksize):
+    print 'Processing files...'
+    start = time.time()
+    for i,arr in enumerate(pool.map(process,files,chunksize=chunksize)):
         mat[i,indices] = 1
         print i,fi
+    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
     print "Generating cooccurrence matrix"
+    start = time.time()
     co = mat.T.dot(mat)
+    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
     np.save('p:/Projects/BigMusic/jared.git/music-gender/comat-simple.npy',co)
 
