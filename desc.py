@@ -223,11 +223,12 @@ if __name__ == '__main__':
         idx_dict = pickle.load(open('P:/Projects/BigMusic/jared.git/music-gender/data/idx_dict_100k'))
         #idx_dict = {k:v for k,v in idx_dict.iteritems() if v<1000}
         #idx = m.dict({k:v for k,v in idx.iteritems() if v<1000})
-        del distance_matrix
         #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
         #result =  np.array(pool.map(func, itertools.izip(files, itertools.repeat(d),itertools.repeat(idx)),chunksize=chunksize),dtype=str)
         bins = np.linspace(0,distance_matrix.max(),101)
         pool = mp.Pool(n_procs,initializer=initProcess,initargs=(d,bins))
+        del distance_matrix
+
         
         
 
