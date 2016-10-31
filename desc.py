@@ -159,7 +159,7 @@ def diversity(input_tuple):
 """
 Calculate jump distance distribution
 """
-def jumpdists(input_tuple):
+def jumpdists(fi):
     
     def calc_dist(a,b):
         if a is None or b is None:
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     import os
     import itertools
 
-    SAMPLE = True
+    SAMPLE = False
     
     ### WRAPPER
     func_dict_single_value = {'unique_artists_norm':unique_artists_norm,'unique_songs_norm':unique_songs_norm,'total_time':total_time,'gini_songs':gini_songs,'gini_artists':gini_artists,'artist_diversity':artist_diversity,'diversity':diversity}
@@ -228,10 +228,7 @@ if __name__ == '__main__':
         bins = np.linspace(0,distance_matrix.max(),101)
         pool = mp.Pool(n_procs,initializer=initProcess,initargs=(d,bins))
         del distance_matrix
-
-        
-        
-
+  
 
     ### METADATA HANDLING
     user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
