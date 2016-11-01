@@ -60,8 +60,8 @@ if __name__=='__main__':
     start = time.time()
 
     gender_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_gender')
-    ids_m = gender_data[gender_data['gender']=='m']
-    ids_f = gender_data[gender_data['gender']=='f']
+    ids_m = set(gender_data[gender_data['gender']=='m']['user_id'])
+    ids_f = set(gender_data[gender_data['gender']=='f']['user_id'])
 
     all_files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
     files_m = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
