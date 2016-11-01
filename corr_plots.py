@@ -41,8 +41,6 @@ def process(fi,thresh=10):
 
 
 
-
-
 #files = sorted(glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*'),key=os.path.getsize,reverse=True)
 
 # result = sparse.lil_matrix((len(files),len(mapping)))
@@ -58,9 +56,18 @@ def process(fi,thresh=10):
 if __name__=='__main__':
     import math
 
-    print 'getting file list...'
+    print 'getting file lists...'
     start = time.time()
-    files = sorted(glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*'),key=os.path.getsize,reverse=True)
+
+    gender_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_gender')
+    ids_m = gender_data[gender_data['gender']=='m']
+    ids_f = gender_data[gender_data['gender']=='f']
+
+    all_files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
+    files_m = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
+    files_f = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_f],key=os.path.getsize,reverse=True)
+    n_m = len(files_m)
+    n_f = len(files_f)
     print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
     print 'Initializing pool...'
@@ -69,26 +76,28 @@ if __name__=='__main__':
     pool = mp.Pool(n_procs)
     print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
-    print 'Initializing matrix...'
-    start = time.time()
-    chunksize = int(math.ceil(len(files) / float(n_procs)))
-    mat = np.zeros((len(files),len(mapping)))
-    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
+    for gender in ('m','f'):
+        files = vars()['files_{}'.format(gender)]
+        print 'Initializing matrix...'
+        start = time.time()
+        chunksize = int(math.ceil(len(files) / float(n_procs)))
+        mat = np.zeros((len(files),len(mapping)))
+        print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
-    print 'Processing files...'
-    start = time.time()
-    for i,arr in enumerate(pool.imap_unordered(process,files,chunksize=chunksize)):
-        if len(arr)>0:
-            mat[i,arr] = 1
-        print i
-    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
+        print 'Processing files...'
+        start = time.time()
+        for i,arr in enumerate(pool.imap_unordered(process,files,chunksize=chunksize)):
+            if len(arr)>0:
+                mat[i,arr] = 1
+            print "{}/{}".format(i+1,vars()['n_{}'.format(gender)])
+        print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
-    print "Generating cooccurrence matrix"
-    start = time.time()
-    co = mat.T.dot(mat)
-    print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
+        print "Generating cooccurrence matrix ({})".format(gender)
+        start = time.time()
+        co = mat.T.dot(mat)
+        print '...done in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
-    np.save('p:/Projects/BigMusic/jared.git/music-gender/comat-simple.npy',co)
+        np.save('p:/Projects/BigMusic/jared.git/music-gender/comat-{}.npy'.format(gender),co)
 
 
 
