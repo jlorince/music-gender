@@ -8,9 +8,10 @@ n_users = len(user_scrobble_counts)
 
 
 def go(input_tuple):
+    thresh = 10
     np.random.seed(time.time())
     start = time.time()
-    idx,thresh,data = input_tuple
+    idx,data = input_tuple
 
     # randomize
     shuf_start = time.time()
@@ -44,7 +45,7 @@ if __name__=='__main__':
     import sys
     import pandas as pd
 
-    thresh = int(sys.argv[1])
+    #thresh = int(sys.argv[1])
 
     # get info for top 10k artists
     print 'Getting artist data...'
@@ -75,6 +76,6 @@ if __name__=='__main__':
     n_procs = 30
     pool = mp.Pool(n_procs)
 
-    pool.map(go,itertools.izip(xrange(1000),itertools.repeat(thresh),itertools.repeat(data)))
+    pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
 
 
