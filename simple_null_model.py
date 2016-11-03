@@ -6,6 +6,21 @@ import itertools
 import sys
 import pandas as pd
 
+null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
+
+def parse(input_path):
+    mean = np.zeros((10000,10000),dtype=float)
+    M2 = np.zeros((10000,10000),dtype=float)
+    n=0.
+    for i in xrange(1000):
+        n+=1
+        current = np.load(null_model_path+'null-simple-{:04d}.npy'.format(model_idx))
+        delta = current - mean
+        mean += (delta / n)
+        M2 += delta*(current-mean)
+    np.save(null_model_path+'null-simple-mean.npy',mean)
+    np.save(null_model_path+'null-simple-std.npy',np.sqrt(M2 / (n-1)))
+
 
 def go(model_idx):
     thresh = 10
@@ -33,7 +48,7 @@ def go(model_idx):
 
     
     start = time.time()
-    np.random.seed(int(time.time()/100.))
+    #np.random.seed(int(time.time()))
     
     # randomize
     shuf_start = time.time()
@@ -71,5 +86,7 @@ if __name__=='__main__':
 
     #pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
     pool.map(go,xrange(1000))
+
+
 
 
