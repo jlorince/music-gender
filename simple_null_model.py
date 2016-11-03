@@ -34,6 +34,7 @@ def go(model_idx):
     
     start = time.time()
     np.random.seed(int(time.time()/100.))
+    
     # randomize
     shuf_start = time.time()
     np.random.shuffle(data)
@@ -55,7 +56,7 @@ def go(model_idx):
     co = mat.T.dot(mat)
     print "Co-occurrence matrix {:04d} generated in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-co_start))))
 
-    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/null-simple-{:04d}.npy'.format(model_idx))
+    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/null-simple-{:04d}.npy'.format(model_idx),co)
 
     print "Null model {:04d} complete in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-start))))
 
