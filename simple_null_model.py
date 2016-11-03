@@ -33,7 +33,7 @@ def go(model_idx):
 
     
     start = time.time()
-    np.random.seed(int(time.time()*100))
+    np.random.seed(int(time.time()/100.))
     # randomize
     shuf_start = time.time()
     np.random.shuffle(data)
