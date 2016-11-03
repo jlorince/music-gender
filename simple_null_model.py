@@ -20,7 +20,6 @@ def go(model_idx):
     print "Artist data {:04d} loaded".format(model_idx)
 
     # build raw data structure (sequence of artists)
-    print 'Building base data structure...'
     included = artist_data[artist_data.artist_id.isin(artist_map['id'])]
     data = np.ones(artist_data['scrobbles'].sum(),dtype=int)
     data = data * -1
@@ -32,8 +31,9 @@ def go(model_idx):
         idx += n
     print "Base data structure {:04d} generated".format(model_idx)
 
-    np.random.seed(time.time())
+    
     start = time.time()
+    np.random.seed(int(time.time()*100))
     # randomize
     shuf_start = time.time()
     np.random.shuffle(data)
