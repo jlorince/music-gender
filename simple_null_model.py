@@ -73,7 +73,7 @@ if __name__=='__main__':
 
     print 'Starting parallel computations:'
     n_procs = 30
-    pool = mp.pool(n_procs)
+    pool = mp.Pool(n_procs)
 
     pool.map(go,itertools.izip(xrange(1000),itertools.repeat(thresh),itertools.repeat(data)))
 
