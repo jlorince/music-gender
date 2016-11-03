@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from collections import Counter
+import multiprocessing as mp
 
 user_scrobble_counts = [int(line.strip()) for line in open('P:/Projects/BigMusic/jared.data/user_scrobble_counts')]
 n_users = len(user_scrobble_counts)
@@ -75,4 +76,5 @@ if __name__=='__main__':
     pool = mp.pool(n_procs)
 
     pool.map(go,itertools.izip(xrange(1000),itertools.repeat(thresh),itertools.repeat(data)))
+
 
