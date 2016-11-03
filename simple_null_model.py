@@ -8,7 +8,7 @@ import pandas as pd
 
 null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
 
-def parse(input_path):
+def parse():
     mean = np.zeros((10000,10000),dtype=float)
     M2 = np.zeros((10000,10000),dtype=float)
     n=0.
