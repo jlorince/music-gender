@@ -91,7 +91,11 @@ if __name__ == '__main__':
     pool = mp.Pool(n_procs)
 
     #pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
-    pool.map(go,xrange(1000))
+    try:
+        pool.map(go,xrange(1000))
+    except KeyboardInterrupt:
+        pool.terminate()
+        pool.join()
 
 
 
