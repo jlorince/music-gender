@@ -5,7 +5,7 @@ import multiprocessing as mp
 import itertools
 import sys
 import pandas as pd
-import os
+import oss
 
 null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
 
@@ -49,6 +49,7 @@ def parse():
 def go(model_idx):
     if os.path.exists('{}null-simple-{:04d}.npy'.format(null_model_path,model_idx)):
         print '{} already done - skipping'.format(model_idx)
+        return None
   
     start = time.time()
     #np.random.seed(int(time.time()))
