@@ -6,6 +6,7 @@ import itertools
 import sys
 import pandas as pd
 import os
+import signal
 
 null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
 
@@ -81,21 +82,36 @@ def go(model_idx):
 
     return None
 
+def main(n_procs):
+    original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+    pool = mp.Pool(n_procs)
+    signal.signal(signal.SIGINT, original_sigint_handler)
+    try:
+        #pool.map(go,xrange(1000))
+        res = pool.map_async(go,xrange(1000))
+        res.get(9999999999999999)
+    except KeyboardInterrupt:
+        print("Caught KeyboardInterrupt, terminating workers")
+        pool.terminate()
+    else:
+        print("Normal termination")
+        pool.close()
+    pool.join()
+
 if __name__ == '__main__':
 
     n_procs = int(sys.argv[1])
+    main(n_procs)
 
+    # print 'Starting parallel computations:'
+    # pool = mp.Pool(n_procs)
 
-    print 'Starting parallel computations:'
-    n_procs = 40
-    pool = mp.Pool(n_procs)
-
-    #pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
-    try:
-        pool.map(go,xrange(1000))
-    except KeyboardInterrupt:
-        pool.terminate()
-        pool.join()
+    # #pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
+    # try:
+    #     pool.map(go,xrange(1000))
+    # except KeyboardInterrupt:
+    #     pool.terminate()
+    #     pool.join()
 
 
 
