@@ -83,9 +83,11 @@ def go(model_idx):
 
 if __name__ == '__main__':
 
+    n_procs = int(sys.argv[1])
+
 
     print 'Starting parallel computations:'
-    n_procs = 60
+    n_procs = 40
     pool = mp.Pool(n_procs)
 
     #pool.map(go,itertools.izip(xrange(1000),itertools.repeat(data)))
