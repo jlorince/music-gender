@@ -58,9 +58,9 @@ def parse():
     np.save(null_model_path+'null-simple-std.npy',np.sqrt(M2 / (n-1)))    
 
 def go(model_idx):
-    if os.path.exists('{}null-simple-{:04d}.npy'.format(null_model_path,model_idx)):
-        print '{} already done - skipping'.format(model_idx)
-        return None
+    # if os.path.exists('{}null-simple-{:04d}.npy'.format(null_model_path,model_idx)):
+    #     print '{} already done - skipping'.format(model_idx)
+    #     return None
   
     start = time.time()
     #np.random.seed(int(time.time()))
