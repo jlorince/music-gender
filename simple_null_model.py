@@ -74,7 +74,7 @@ def go(model_idx):
     idx = 0
     for gender in ('m','f'):
         mat_start = time.time()
-        mat = np.zeros((vars()[gender+'_count'],10000))
+        mat = np.zeros((globals()[gender+'_count'],10000))
         
         for i,n_scrobbles in enumerate(user_scrobble_counts[user_scrobble_counts['gender']==gender]['sample_playcount']):       
             arr = data[idx:idx+n_scrobbles]
