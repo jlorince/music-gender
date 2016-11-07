@@ -33,12 +33,12 @@ if __name__ != '__main__':
     data = np.ones(artist_scrobble_counts['total'].sum(),dtype=int)
     data = data * -1
     idx = 0
-    for i,(aid,n) in enumerate(zip(included['artist_id'],included['scrobbles'])):
+    for i,(aid,n) in enumerate(zip(included['artist_id'],included['total'])):
         artist_idx = d.get(aid)
         if artist_idx is not None:
             data[idx:idx+n] = artist_idx
         idx += n
-    print "Base data structure generated".format()
+    print "Base data structure generated"
 
 def parse():
     mean = np.zeros((10000,10000),dtype=float)
