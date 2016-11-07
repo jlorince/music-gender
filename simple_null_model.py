@@ -30,7 +30,7 @@ if __name__ != '__main__':
     #included = artist_data[artist_data.artist_id.isin(artist_map['id'])]
     included = artist_scrobble_counts[artist_scrobble_counts.artist_id.isin(artist_map['id'])]
     #data = np.ones(artist_data['scrobbles'].sum(),dtype=int)
-    data = np.ones(artist_scrobble_counts['total'],sum(),dtype=int)
+    data = np.ones(artist_scrobble_counts['total'].sum(),dtype=int)
     data = data * -1
     idx = 0
     for i,(aid,n) in enumerate(zip(included['artist_id'],included['scrobbles'])):
