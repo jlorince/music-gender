@@ -58,10 +58,26 @@ def parse():
     np.save(null_model_path+'null-simple-std.npy',np.sqrt(M2 / (n-1)))    
 
 def go(model_idx):
-    if os.path.exists('{}null-simple-m-{:04d}.npy'.format(null_model_path,model_idx)) and \
-       os.path.exists('{}null-simple-f-{:04d}.npy'.format(null_model_path,model_idx)):
-         print '{} already done - skipping'.format(model_idx)
-         return None
+    exists_m = os.path.exists('{}null-simple-m-{:04d}.npy'.format(null_model_path,model_idx))
+    exists_f = os.path.exists('{}null-simple-f-{:04d}.npy'.format(null_model_path,model_idx))
+
+    if exists_m and exists_f:
+        print '{} already done - skipping'.format(model_idx)
+        return None
+
+    genders = ('m','f')
+    # elif exists_m:
+    #     idx = int(user_scrobble_counts[user_scrobble_counts['gender']=='m']['sample_playcount'].sum())
+    #     print '{}:male already done - just running for female'.format(model_idx)
+    #     genders = ('f',)
+    # elif exists_f:
+    #     idx = 0
+    #     print '{}:female already done - just running for male'.format(model_idx)
+    #     genders = ('m',)
+    # else:
+    #     idx = 0
+    #     genders = ('m','f')
+
   
     start = time.time()
     #np.random.seed(int(time.time()))
@@ -72,12 +88,8 @@ def go(model_idx):
     print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
 
     # Generate base matrix
-    idx = 0
-    for gender in ('m','f'):
-        # this doesn't work for now because we use the same idx variable across men and women - needs tweaking
-        #if os.path.exists('{}null-simple-{}-{:04d}.npy'.format(null_model_path,gender,model_idx)):
-        #    print '{} - {} already done - skipping'.format(model_idx,gender)
-        #    continue
+    
+    for gender in genders:
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
         
