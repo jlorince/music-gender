@@ -40,7 +40,7 @@ def process(fi):
 
     mat = sparse.csr_matrix((vc.values,(i,j)),shape=(10001,10001))
 
-    save_sparse_csr('S:/UsersData/jjl228/scratch/{}.npz'.format(fi[:-4]),mat)
+    save_sparse_csr('S:/UsersData/jjl228/scratch/{}.npz'.format(fi[fi.find('\\')+1:-4]),mat)
     print "{} processed".format(fi)
 
 
