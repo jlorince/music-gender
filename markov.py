@@ -10,7 +10,7 @@ import sys
 import math
 
 if __name__ != '__main__':
-    
+
     def save_sparse_csr(filename,array):
         np.savez(filename,data = array.data ,indices=array.indices,
                  indptr =array.indptr, shape=array.shape )
@@ -40,7 +40,7 @@ def process(fi):
 
     mat = sparse.csr_matrix((vc.values,(i,j)),shape=(10001,10001))
 
-    save_sparse_csr('S:/UsersData/jjl228/scratch/{}.npz'.format(fi[:-4]))
+    save_sparse_csr('S:/UsersData/jjl228/scratch/{}.npz'.format(fi[:-4]),mat)
     print "{} processed".format(fi)
 
 
