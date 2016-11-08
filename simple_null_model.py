@@ -105,7 +105,7 @@ def comat(model_idx):
     print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
 
     # Generate base matrix
-    
+    idx = 0
     for gender in genders:
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
