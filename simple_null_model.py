@@ -58,9 +58,10 @@ def parse():
     np.save(null_model_path+'null-simple-std.npy',np.sqrt(M2 / (n-1)))    
 
 def go(model_idx):
-    # if os.path.exists('{}null-simple-{:04d}.npy'.format(null_model_path,model_idx)):
-    #     print '{} already done - skipping'.format(model_idx)
-    #     return None
+    if os.path.exists('{}null-simple-m-{:04d}.npy'.format(null_model_path,model_idx)) and \
+       os.path.exists('{}null-simple-f-{:04d}.npy'.format(null_model_path,model_idx)):
+         print '{} already done - skipping'.format(model_idx)
+         return None
   
     start = time.time()
     #np.random.seed(int(time.time()))
@@ -73,6 +74,9 @@ def go(model_idx):
     # Generate base matrix
     idx = 0
     for gender in ('m','f'):
+        if os.path.exists('{}null-simple-{}-{:04d}.npy'.format(null_model_path,gender,model_idx)):
+            print '{} - {} already done - skipping'.format(model_idx,gender)
+            continue
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
         
