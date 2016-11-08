@@ -8,22 +8,50 @@ from glob import glob
 import signal
 import sys
 import math
+from scipy.sparse import csr_matrix
+
+def save_sparse_csr(filename,array):
+    np.savez(filename,data = array.data ,indices=array.indices,
+             indptr =array.indptr, shape=array.shape )
+
+def load_sparse_csr(filename):
+    loader = np.load(filename)
+    return csr_matrix((  loader['data'], loader['indices'], loader['indptr']),
+                         shape = loader['shape'])
+
+def parse():
+    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+    m = user_scrobble_counts[user_scrobble_counts['gender']=='m']['user_id']
+    f = user_scrobble_counts[user_scrobble_counts['gender']=='f']['user_id']
+    nm = len(m)
+    nf = len(f)
+    print nm,nf
+    mmat = np.zeros((10001,10001))
+    fmat = np.zeros((10001,10001))
+    for i,userid in enumerate(m,1):
+        current = load_sparse_csr("S:/UsersData/jjl2228/scratch/{}.npz".format(userid))
+        for j,(start,end) in enumerate(zip(current.indptr[:-1],current.indptr[1:])):
+            mmat[j,current.indices[start:end]] += current.data[start:end]
+        print "{}/{}".format(i,nm)
+    for i,userid in enumerate(f,1):
+        current = load_sparse_csr("S:/UsersData/jjl2228/scratch/{}.npz".format(userid))
+        for j,(start,end) in enumerate(zip(current.indptr[:-1],current.indptr[1:])):
+            fmat[j,current.indices[start:end]] += current.data[start:end]
+        print "{}/{}".format(i,nf)
+    combined = mmat + fmat
+    combined = combined/combined.sum(1,keepdims=True,dtype=float)
+    mmat = mmat/mmat.sum(1,keepdims=True,dtype=float)
+    fmat = fmat/fmat.sum(1,keepdims=True,dtype=float)
+
+    np.save('p:/Projects/BigMusic/jared.git/music-gender/markov-m.npy',mmat)
+    np.save('p:/Projects/BigMusic/jared.git/music-gender/markov-f.npy',fmat)
+    np.save('p:/Projects/BigMusic/jared.git/music-gender/markov-combined.npy',combined)
+        
 
 if __name__ != '__main__':
 
-    def save_sparse_csr(filename,array):
-        np.savez(filename,data = array.data ,indices=array.indices,
-                 indptr =array.indptr, shape=array.shape )
-
-    def load_sparse_csr(filename):
-        loader = np.load(filename)
-        return csr_matrix((  loader['data'], loader['indices'], loader['indptr']),
-                             shape = loader['shape'])
-
-
     artist_map = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').sort_values('idx')[:10000]
     mapping = dict(zip(artist_map['id'],artist_map['idx']))
-
 
     def parse_df(fi,include_time=False):
         return pd.read_table(fi,header=None,names=['song_id','artist_id','ts'],usecols=['artist_id'])

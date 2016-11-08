@@ -7,9 +7,11 @@ import sys
 import pandas as pd
 import os
 import signal
+from scipy.sparse import csr_matrix
 
 #null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
 null_model_path = 'S:/UsersData/jjl2228/NULL-MODELS/'
+
 
 if __name__ != '__main__':
     thresh = 10
@@ -41,24 +43,50 @@ if __name__ != '__main__':
         idx += n
     print "Base data structure generated"
 
-def parse():
-    mean = np.zeros((10000,10000),dtype=float)
-    M2 = np.zeros((10000,10000),dtype=float)
-    n=0.
-    for i in xrange(1000):
-        try:
-            current = np.load(null_model_path+'null-simple-{:04d}.npy'.format(i))
-            print i,
-        except: 
-            continue
-        n+=1
-        delta = current - mean
-        mean += (delta / n)
-        M2 += delta*(current-mean)
-    np.save(null_model_path+'null-simple-mean.npy',mean)
-    np.save(null_model_path+'null-simple-std.npy',np.sqrt(M2 / (n-1)))    
+def parse(combine_genders=False,mode='comat'):
 
-def go(model_idx):
+    if mode  == 'markov-':
+        prefix = mode
+    else:
+        prefix =''
+
+    if combine_genders:
+        iter_over = ('combined',)
+    else:
+        iter_over = ('m','f')
+    for gender in iter_over:
+        if mode == 'comat':
+            mean = np.zeros((10000,10000),dtype=float)
+            M2 = np.zeros((10000,10000),dtype=float)
+
+        elif mode == 'markov':
+            mean = np.zeros((10001,10001),dtype=float)
+            M2 = np.zeros((10001,10001),dtype=float)
+        
+        n=0.
+        for i in xrange(1000):
+            try:
+                if combine_genders:
+                    m = np.load(null_model_path+'{}null-simple-m-{:04d}.npy'.format(prefix,i))
+                    f = np.load(null_model_path+'{}null-simple-f-{:04d}.npy'.format(prefix,i))
+                    current = m+f
+                else:
+                    current = np.load(null_model_path+'{}null-simple-{}-{:04d}.npy'.format(prefix,gender,i))
+                print i,
+
+                if mode == 'markov':
+                    current = current / current.sum(1,keepdims=True)
+            except: 
+                continue
+            n+=1
+            delta = current - mean
+            mean += (delta / n)
+            M2 += delta*(current-mean)
+
+        np.save(null_model_path+'{}null-simple-{}-mean.npy'.format(prefix,gender),mean)
+        np.save(null_model_path+'{}null-simple-{}-std.npy'.format(prefix,gender),np.sqrt(M2 / (n-1)))
+
+def comat(model_idx):
     exists_m = os.path.exists('{}null-simple-m-{:04d}.npy'.format(null_model_path,model_idx))
     exists_f = os.path.exists('{}null-simple-f-{:04d}.npy'.format(null_model_path,model_idx))
 
@@ -100,13 +128,62 @@ def go(model_idx):
 
     return None
 
-def main(n_procs):
+def markov(model_idx):
+    exists_m = os.path.exists('{}markov-null-simple-m-{:04d}.npy'.format(null_model_path,model_idx))
+    exists_f = os.path.exists('{}markov-null-simple-f-{:04d}.npy'.format(null_model_path,model_idx))
+
+    if exists_m and exists_f:
+        print '{} already done - skipping'.format(model_idx)
+        return None
+
+    genders = ('m','f')
+  
+    start = time.time()
+    #np.random.seed(int(time.time()))
+    
+    # randomize
+    shuf_start = time.time()
+    np.random.shuffle(data)
+    print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
+
+    # Generate base matrix
+    
+    idx = 0
+    for gender in genders:
+        mat_start = time.time()
+        mat = np.zeros((10001,10001))
+        
+        for i,n_scrobbles in enumerate(user_scrobble_counts[user_scrobble_counts['gender']==gender]['sample_playcount']):       
+            arr = data[idx:idx+n_scrobbles]
+            
+            df = pd.DataFrame({'idx':arr})
+            df['idx'][df['idx']==-1] = 10000
+            df['last'] = df['idx'].shift(1)
+            df.set_value(0,'last',10000)
+            df['transition'] = df.apply(lambda row: (int(row['last']),row['idx']) ,axis=1)
+            vc = df['transition'].value_counts()
+
+            for (i,j),n in vc.iteritems():
+                mat[i,j] += n
+            
+            idx += n_scrobbles
+
+        np.save('{}markov-null-simple-{}-{:04d}.npy'.format(null_model_path,gender,model_idx),co)
+
+    print "Null model {:04d} complete in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-start))))
+
+    return None
+
+def main(n_procs,func):
     original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     pool = mp.Pool(n_procs)
     signal.signal(signal.SIGINT, original_sigint_handler)
     try:
         #pool.map(go,xrange(1000))
-        res = pool.map_async(go,xrange(1000))
+        if func == 'comat':
+            res = pool.map_async(comat,xrange(1000))
+        elif func == 'markov':
+            res = pool.map_async(markov,xrange(1000))
         res.get(9999999999999999)
     except KeyboardInterrupt:
         print("Caught KeyboardInterrupt, terminating workers")
@@ -119,7 +196,8 @@ def main(n_procs):
 if __name__ == '__main__':
 
     n_procs = int(sys.argv[1])
-    main(n_procs)
+    func = sys.argv[2]
+    main(n_procs,func)
 
     # print 'Starting parallel computations:'
     # pool = mp.Pool(n_procs)
