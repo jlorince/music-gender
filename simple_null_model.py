@@ -74,9 +74,10 @@ def go(model_idx):
     # Generate base matrix
     idx = 0
     for gender in ('m','f'):
-        if os.path.exists('{}null-simple-{}-{:04d}.npy'.format(null_model_path,gender,model_idx)):
-            print '{} - {} already done - skipping'.format(model_idx,gender)
-            continue
+        # this doesn't work for now because we use the same idx variable across men and women - needs tweaking
+        #if os.path.exists('{}null-simple-{}-{:04d}.npy'.format(null_model_path,gender,model_idx)):
+        #    print '{} - {} already done - skipping'.format(model_idx,gender)
+        #    continue
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
         
