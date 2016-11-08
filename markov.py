@@ -7,6 +7,7 @@ from scipy import sparse
 from glob import glob
 import signal
 import sys
+import math
 
 def save_sparse_csr(filename,array):
     np.savez(filename,data = array.data ,indices=array.indices,
