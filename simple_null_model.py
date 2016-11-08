@@ -8,7 +8,8 @@ import pandas as pd
 import os
 import signal
 
-null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
+#null_model_path = 'P:/Projects/BigMusic/jared.git/music-gender/data/NULL-MODELS/'
+null_model_path = 'S:/UsersData/jjl2228/NULL-MODELS/'
 
 if __name__ != '__main__':
     thresh = 10
@@ -66,18 +67,6 @@ def go(model_idx):
         return None
 
     genders = ('m','f')
-    # elif exists_m:
-    #     idx = int(user_scrobble_counts[user_scrobble_counts['gender']=='m']['sample_playcount'].sum())
-    #     print '{}:male already done - just running for female'.format(model_idx)
-    #     genders = ('f',)
-    # elif exists_f:
-    #     idx = 0
-    #     print '{}:female already done - just running for male'.format(model_idx)
-    #     genders = ('m',)
-    # else:
-    #     idx = 0
-    #     genders = ('m','f')
-
   
     start = time.time()
     #np.random.seed(int(time.time()))

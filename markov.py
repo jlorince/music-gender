@@ -36,7 +36,8 @@ def process(fi):
 
     mat = sparse.csr_matrix((vc.values,(i,j)),shape=(10001,10001))
 
-    save_sparse_csr('P:/Projects/BigMusic/scratch/{}.npz'.format(fi[:-4]))
+    save_sparse_csr('S:/UsersData/jjl228/scratch/{}.npz'.format(fi[:-4]))
+    print "{} processed".format(fi)
 
 
 def main(n_procs):
@@ -46,7 +47,7 @@ def main(n_procs):
     chunksize = int(math.ceil(len(all_files) / float(n_procs)))
     signal.signal(signal.SIGINT, original_sigint_handler)
     try:
-        res = pool.map_async(process,files)
+        res = pool.map_async(process,all_files)
         res.get(9999999999999999)
     except KeyboardInterrupt:
         print("Caught KeyboardInterrupt, terminating workers")
