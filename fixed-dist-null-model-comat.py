@@ -129,10 +129,10 @@ if __name__ != '__main__':
                           header=None,names=['user','gender','artist','N'])
     #data = data[(data['N']>=thresh)]
 
-    # user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
-    # gc = user_scrobble_counts['gender'].value_counts()
-    # m_count = gc.ix['m']
-    # f_count = gc.ix['f']
+    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+    gc = user_scrobble_counts['gender'].value_counts()
+    m_count = gc.ix['m']
+    f_count = gc.ix['f']
 
 
 
