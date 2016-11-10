@@ -42,6 +42,8 @@ def parse(combine_genders=False,mode='comat'):
                     current = m+f
                 else:
                     current = np.load(null_model_path+'{}null-simple-{}-{:04d}.npy'.format(prefix,gender,i))
+
+                current += 1 # pseudocount
                 print i,
 
                 if mode == 'markov':

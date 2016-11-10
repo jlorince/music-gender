@@ -91,8 +91,12 @@ def comat(input_tuple):
 
         result = data[(data['gender']==gender)&(data['N']>=thresh)].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
 
-        for i,indices in enumerate(result.values):
-            mat[i,indices] = 1
+        # for i,indices in enumerate(result.values):
+        #     mat[i,indices] = 1
+        for i,user in enumereate({'m':males,'f':females}['gender']):
+            indices = result.get(user)
+            if indices is not None:
+                mat[i,indices] = 1
 
         print "Matrix {:04d} ({}) generated in {}".format(model_idx,gender,str(datetime.timedelta(seconds=(time.time()-mat_start))))
 
@@ -131,6 +135,8 @@ if __name__ != '__main__':
 
     user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
     gc = user_scrobble_counts['gender'].value_counts()
+    males = user_scrobble_counts[user_scrobble_counts.gender=='m']['user']
+    females = user_scrobble_counts[user_scrobble_counts.gender=='f']['user']
     m_count = gc.ix['m']
     f_count = gc.ix['f']
 
