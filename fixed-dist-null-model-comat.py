@@ -88,7 +88,7 @@ def comat(model_idx):
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
 
-        result = data[data['gender']==gender].groupby('user_id').apply(lambda x: [a for a in x.artist.values if a != -1])
+        result = data[data['gender']==gender].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
 
         for i,indices in result.iteritems():
             mat[i,indices] = 1
