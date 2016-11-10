@@ -13,40 +13,10 @@ from scipy.sparse import csr_matrix
 null_model_path = 'S:/UsersData/jjl2228/NULL-MODELS/'
 
 
-if __name__ != '__main__':
-    thresh = 10
-
-    #user_scrobble_counts = [int(line.strip()) for line in open('P:/Projects/BigMusic/jared.data/user_scrobble_counts')]
-    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
-    gc = user_scrobble_counts['gender'].value_counts()
-    m_count = gc.ix['m']
-    f_count = gc.ix['f']
-
-    # get info for top 10k artists
-    #artist_data = pd.read_table('U:/Users/jjl2228/Desktop/artist_data',header=None,names=['artist_id','artist_name','scrobbles','listeners'])
-    artist_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/artist_scrobble_counts_by_gender')
-    artist_map = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').sort_values('idx')[:10000]
-    d = dict(zip(artist_map['id'],artist_map['idx']))
-    print "Artist data loaded"
-
-    # build raw data structure (sequence of artists)
-    #included = artist_data[artist_data.artist_id.isin(artist_map['id'])]
-    included = artist_scrobble_counts[artist_scrobble_counts.artist_id.isin(artist_map['id'])]
-    #data = np.ones(artist_data['scrobbles'].sum(),dtype=int)
-    data = np.ones(artist_scrobble_counts['total'].sum(),dtype=int)
-    data = data * -1
-    idx = 0
-    for i,(aid,n) in enumerate(zip(included['artist_id'],included['total'])):
-        artist_idx = d.get(aid)
-        if artist_idx is not None:
-            data[idx:idx+n] = artist_idx
-        idx += n
-    print "Base data structure generated"
-
 def parse(combine_genders=False,mode='comat'):
 
-    if mode  == 'markov-':
-        prefix = mode
+    if mode  == 'markov':
+        prefix = 'markov-'
     else:
         prefix =''
 
@@ -192,6 +162,36 @@ def main(n_procs,func):
         print("Normal termination")
         pool.close()
     pool.join()
+
+if __name__ != '__main__':
+    thresh = 10
+
+    #user_scrobble_counts = [int(line.strip()) for line in open('P:/Projects/BigMusic/jared.data/user_scrobble_counts')]
+    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+    gc = user_scrobble_counts['gender'].value_counts()
+    m_count = gc.ix['m']
+    f_count = gc.ix['f']
+
+    # get info for top 10k artists
+    #artist_data = pd.read_table('U:/Users/jjl2228/Desktop/artist_data',header=None,names=['artist_id','artist_name','scrobbles','listeners'])
+    artist_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/artist_scrobble_counts_by_gender')
+    artist_map = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').sort_values('idx')[:10000]
+    d = dict(zip(artist_map['id'],artist_map['idx']))
+    print "Artist data loaded"
+
+    # build raw data structure (sequence of artists)
+    #included = artist_data[artist_data.artist_id.isin(artist_map['id'])]
+    included = artist_scrobble_counts[artist_scrobble_counts.artist_id.isin(artist_map['id'])]
+    #data = np.ones(artist_data['scrobbles'].sum(),dtype=int)
+    data = np.ones(artist_scrobble_counts['total'].sum(),dtype=int)
+    data = data * -1
+    idx = 0
+    for i,(aid,n) in enumerate(zip(included['artist_id'],included['total'])):
+        artist_idx = d.get(aid)
+        if artist_idx is not None:
+            data[idx:idx+n] = artist_idx
+        idx += n
+    print "Base data structure generated"
 
 if __name__ == '__main__':
 
