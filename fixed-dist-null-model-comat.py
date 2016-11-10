@@ -106,7 +106,7 @@ def comat(model_idx,mode='artist'):
     return None
 
 
-def main(n_procs):
+def main(n_procs,mode):
     original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     pool = mp.Pool(n_procs)
     signal.signal(signal.SIGINT, original_sigint_handler)
