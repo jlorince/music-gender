@@ -93,7 +93,7 @@ def comat(input_tuple):
 
         # for i,indices in enumerate(result.values):
         #     mat[i,indices] = 1
-        for i,user in enumerate({'m':males,'f':females}['gender']):
+        for i,user in enumerate({'m':males,'f':females}[gender]):
             indices = result.get(user)
             if indices is not None:
                 mat[i,indices] = 1
