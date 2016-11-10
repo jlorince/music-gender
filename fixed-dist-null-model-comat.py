@@ -57,7 +57,8 @@ def parse(combine_genders=False,mode='comat'):
         np.save(null_model_path+'{}null-artist_dist-{}-std.npy'.format(prefix,gender),np.sqrt(M2 / (n-1)))
 
 
-def comat(model_idx,mode='artist'):
+def comat(input_tuple):
+    model_idx,mode = input_tuple
     exists_m = os.path.exists('{}null-{}_dist-m-{:04d}.npy'.format(null_model_path,mode,model_idx))
     exists_f = os.path.exists('{}null-{}_dist-f-{:04d}.npy'.format(null_model_path,mode,model_idx))
 
