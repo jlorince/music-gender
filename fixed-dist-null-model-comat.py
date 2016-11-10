@@ -57,9 +57,9 @@ def parse(combine_genders=False,mode='comat'):
         np.save(null_model_path+'{}null-artist_dist-{}-std.npy'.format(prefix,gender),np.sqrt(M2 / (n-1)))
 
 
-def comat(model_idx):
-    exists_m = os.path.exists('{}null-artist_dist-m-{:04d}.npy'.format(null_model_path,model_idx))
-    exists_f = os.path.exists('{}null-artist_dist-f-{:04d}.npy'.format(null_model_path,model_idx))
+def comat(model_idx,mode='artist'):
+    exists_m = os.path.exists('{}null-{}_dist-m-{:04d}.npy'.format(null_model_path,mode,model_idx))
+    exists_f = os.path.exists('{}null-{}_dist-f-{:04d}.npy'.format(null_model_path,mode,model_idx))
 
     if exists_m and exists_f:
         print '{} already done - skipping'.format(model_idx)
@@ -80,7 +80,7 @@ def comat(model_idx):
         artist_arr = data['artist'].values.copy()
         np.random.shuffle(artist_arr)
         data['artist'] = artist_arr
-    data = data.sort_values(by=['gender','user'],ascending=True)
+    #data = data.sort_values(by=['gender','user'],ascending=True)
     print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
 
 
@@ -88,7 +88,7 @@ def comat(model_idx):
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
 
-        result = data[data['gender']==gender].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
+        result = data[(data['gender']==gender)&(data['N']>=thresh)].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
 
         for i,indices in result.iteritems():
             mat[i,indices] = 1
@@ -106,7 +106,7 @@ def comat(model_idx):
     return None
 
 
-def main(n_procs,mode):
+def main(n_procs):
     original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     pool = mp.Pool(n_procs)
     signal.signal(signal.SIGINT, original_sigint_handler)
@@ -126,12 +126,12 @@ if __name__ != '__main__':
 
     data = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender_idx10k',
                           header=None,names=['user','gender','artist','N'])
-    data = data[(data['N']>=thresh)]
+    #data = data[(data['N']>=thresh)]
 
-    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
-    gc = user_scrobble_counts['gender'].value_counts()
-    m_count = gc.ix['m']
-    f_count = gc.ix['f']
+    # user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+    # gc = user_scrobble_counts['gender'].value_counts()
+    # m_count = gc.ix['m']
+    # f_count = gc.ix['f']
 
 
 
