@@ -91,7 +91,7 @@ def comat(input_tuple):
 
         result = data[(data['gender']==gender)&(data['N']>=thresh)].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
 
-        for i,indices in result.iteritems():
+        for i,indices in enumerate(result.values)
             mat[i,indices] = 1
 
         print "Matrix {:04d} ({}) generated in {}".format(model_idx,gender,str(datetime.timedelta(seconds=(time.time()-mat_start))))
