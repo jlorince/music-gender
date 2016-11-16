@@ -109,7 +109,7 @@ def main(n_procs,func):
 if __name__ == '__main__':
 
     n_procs = int(sys.argv[1])
-    main(n_procs,func)
+    main(n_procs)
 
 
 
