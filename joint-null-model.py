@@ -2,6 +2,7 @@ import multiprocessing as mp
 import time,sys,os
 import pandas as pd
 import numpy as np
+import signal
 
 thresh = 10
 
