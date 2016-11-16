@@ -5,6 +5,7 @@ import numpy as np
 import signal
 
 thresh = 10
+null_model_path = 'S:/UsersData_NoExpiration/jjl2228/NULL-MODELS/'
 
 if __name__ != "__main__":
 
@@ -25,8 +26,8 @@ if __name__ != "__main__":
     for weight,cnt in counts_by_edge_weight.iteritems():
         if cnt>=chunk_size:
             current = df[df['n']==weight]
-            current['artist'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
-            chunks.append(current)
+            current['idx'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
+            chunks.append(current[['user','gender','idx']])
         else:
             break
 
@@ -34,8 +35,8 @@ if __name__ != "__main__":
     condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
     while idx<len(condensed):
         current = condensed.iloc[idx:idx+chunk_size]
-        current['artist'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
-        chunks.append()
+        current['idx'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
+        chunks.append(current[['user','gender','idx','n']])
         idx += chunksize
 
     print 'Base data prepped in {}',format(str(datetime.timedelta(seconds=(time.time()-shuf_start))))
@@ -57,9 +58,9 @@ def comat(model_idx):
     # randomize
     shuf_start = time.time()
     for chunk in chunks:
-        artist_arr = chunk['artist'].values.copy()
+        artist_arr = chunk['idx'].values.copy()
         np.random.shuffle(artist_arr)
-        chunk['artist'] = artist_arr
+        chunk['idx'] = artist_arr
     data = pd.concat(chunks)
 
     print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
@@ -68,7 +69,7 @@ def comat(model_idx):
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
 
-        result = data[(data['gender']==gender)&(data['N']>=thresh)].groupby('user').apply(lambda x: [a for a in x.artist.values if a != -1])
+        result = data[(data['gender']==gender)&(data['n']>=thresh)].groupby('user').apply(lambda x: [a for a in x.idx.values if a != -1])
 
         # for i,indices in enumerate(result.values):
         #     mat[i,indices] = 1
