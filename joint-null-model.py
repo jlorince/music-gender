@@ -25,16 +25,16 @@ if __name__ != "__main__":
     for weight,cnt in counts_by_edge_weight.iteritems():
         if cnt>=chunk_size:
             current = df[df['n']==weight]
-            current['artist'] = current['artist'].apply(lambda x: d.get(x,-1))
+            current['artist'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
             chunks.append(current)
         else:
             break
 
     idx = 0
-    condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunks_size],on='n',rsuffix='_').sort_values('n')
+    condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
     while idx<len(condensed):
         current = condensed.iloc[idx:idx+chunk_size]
-        current['artist'] = current['artist'].apply(lambda x: d.get(x,-1))
+        current['artist'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
         chunks.append()
         idx += chunksize
 
