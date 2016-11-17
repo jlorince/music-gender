@@ -11,6 +11,13 @@ null_model_path = 'S:/UsersData_NoExpiration/jjl2228/NULL-MODELS/'
 if __name__ != "__main__":
 
     start = time.time()
+
+    user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+    gc = user_scrobble_counts['gender'].value_counts()
+    m_count = gc.ix['m']
+    f_count = gc.ix['f']
+
+
     chunk_size = 10000
 
     artist_map = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-15.pkl').sort_values('idx')[:10000]
@@ -26,21 +33,21 @@ if __name__ != "__main__":
     chunks = []
     for weight,cnt in counts_by_edge_weight.iteritems():
         if cnt>=chunk_size:
-            current = df[df['n']==weight]
-            current['idx'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
-            chunks.append(current[['user','gender','idx']])
+            current = df[df['n']==weight].copy()
+            current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
+            chunks.append(current[['user','gender','idx','n']])
         else:
             break
 
     idx = 0
     condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
     while idx<len(condensed):
-        current = condensed.iloc[idx:idx+chunk_size]
-        current['idx'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
+        current = condensed.iloc[idx:idx+chunk_size].copy()
+        current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
         chunks.append(current[['user','gender','idx','n']])
         idx += chunk_size
 
-    print 'Base data prepped in {}',format(str(datetime.timedelta(seconds=(time.time()-start))))
+    print 'Base data prepped in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
 
 def comat(model_idx):
