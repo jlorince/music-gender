@@ -14,6 +14,8 @@ if __name__ != "__main__":
 
     user_scrobble_counts = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
     gc = user_scrobble_counts['gender'].value_counts()
+    males = user_scrobble_counts[user_scrobble_counts.gender=='m']['user_id']
+    females = user_scrobble_counts[user_scrobble_counts.gender=='f']['user_id']
     m_count = gc.ix['m']
     f_count = gc.ix['f']
 
