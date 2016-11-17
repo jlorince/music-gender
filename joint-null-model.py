@@ -40,7 +40,7 @@ if __name__ != "__main__":
         chunks.append(current[['user','gender','idx','n']])
         idx += chunk_size
 
-    print 'Base data prepped in {}',format(str(datetime.timedelta(seconds=(time.time()-shuf_start))))
+    print 'Base data prepped in {}',format(str(datetime.timedelta(seconds=(time.time()-start))))
 
 
 def comat(model_idx):
