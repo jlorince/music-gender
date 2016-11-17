@@ -37,7 +37,7 @@ if __name__ != "__main__":
         current = condensed.iloc[idx:idx+chunk_size]
         current['idx'] = current['artist'].apply(lambda x: d.get(x,-1)).copy()
         chunks.append(current[['user','gender','idx','n']])
-        idx += chunksize
+        idx += chunk_size
 
     print 'Base data prepped in {}',format(str(datetime.timedelta(seconds=(time.time()-shuf_start))))
 
