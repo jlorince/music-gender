@@ -8,6 +8,51 @@ import datetime
 thresh = 10
 null_model_path = 'S:/UsersData_NoExpiration/jjl2228/NULL-MODELS/'
 
+def parse(combine_genders=False,mode='comat'):
+
+    if mode  == 'markov':
+        prefix = 'markov-'
+    else:
+        prefix =''
+
+    if combine_genders:
+        iter_over = ('combined',)
+    else:
+        iter_over = ('m','f')
+    for gender in iter_over:
+        if mode == 'comat':
+            mean = np.zeros((10000,10000),dtype=float)
+            M2 = np.zeros((10000,10000),dtype=float)
+
+        elif mode == 'markov':
+            mean = np.zeros((10001,10001),dtype=float)
+            M2 = np.zeros((10001,10001),dtype=float)
+        
+        n=0.
+        for i in xrange(1000):
+            try:
+                if combine_genders:
+                    m = np.load(null_model_path+'{}null-joint-m-{:04d}.npy'.format(prefix,i))
+                    f = np.load(null_model_path+'{}null-joint-f-{:04d}.npy'.format(prefix,i))
+                    current = m+f
+                else:
+                    current = np.load(null_model_path+'{}null-joint-{}-{:04d}.npy'.format(prefix,gender,i))
+
+                #current += 1 # pseudocount
+                print i,
+
+                if mode == 'markov':
+                    current = current / current.sum(1,keepdims=True)
+            except: 
+                continue
+            n+=1
+            delta = current - mean
+            mean += (delta / n)
+            M2 += delta*(current-mean)
+
+        np.save(null_model_path+'{}null-joint-{}-mean.npy'.format(prefix,gender),mean)
+        np.save(null_model_path+'{}null-joint-{}-std.npy'.format(prefix,gender),np.sqrt(M2 / (n-1)))
+
 if __name__ != "__main__":
 
     start = time.time()
@@ -26,28 +71,34 @@ if __name__ != "__main__":
     d = dict(zip(artist_map['id'],artist_map['idx']))
     print "Artist data loaded"
 
-    df = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender',header=None,names=['user','gender','artist','n'])
-    total_edges = len(df)
+    df_combined = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender',header=None,names=['user','gender','artist','n'])
 
-    counts_by_edge_weight = df['n'].value_counts()
+    chunkdict = {}
+    for gender in ('m','f'):
 
+        df = df_combined[df_combined['gender']==gender]
 
-    chunks = []
-    for weight,cnt in counts_by_edge_weight.iteritems():
-        if cnt>=chunk_size:
-            current = df[df['n']==weight].copy()
+        counts_by_edge_weight = df['n'].value_counts()
+
+        chunks = []
+        for weight,cnt in counts_by_edge_weight.iteritems():
+            if cnt>=chunk_size:
+                current = df[df['n']==weight].copy()
+                current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
+                chunks.append(current[['user','gender','idx','n']])
+            else:
+                break
+
+        idx = 0
+        condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
+        while idx<len(condensed):
+            current = condensed.iloc[idx:idx+chunk_size].copy()
             current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
             chunks.append(current[['user','gender','idx','n']])
-        else:
-            break
+            idx += chunk_size
 
-    idx = 0
-    condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
-    while idx<len(condensed):
-        current = condensed.iloc[idx:idx+chunk_size].copy()
-        current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
-        chunks.append(current[['user','gender','idx','n']])
-        idx += chunk_size
+        chunkdict[gender] = chunks
+
 
     print 'Base data prepped in {}'.format(str(datetime.timedelta(seconds=(time.time()-start))))
 
@@ -65,21 +116,23 @@ def comat(model_idx):
     start = time.time()
     #np.random.seed(int(time.time()))
     
-    # randomize
-    shuf_start = time.time()
-    for chunk in chunks:
-        artist_arr = chunk['idx'].values.copy()
-        np.random.shuffle(artist_arr)
-        chunk['idx'] = artist_arr
-    data = pd.concat(chunks)
-
-    print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
-
     for gender in genders:
+        # randomize
+        shuf_start = time.time()
+        for chunk in chunks[gender]:
+            artist_arr = chunk['idx'].values.copy()
+            np.random.shuffle(artist_arr)
+            chunk['idx'] = artist_arr
+        data = pd.concat(chunks[gender])
+
+        print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
+
+    #for gender in genders:
         mat_start = time.time()
         mat = np.zeros((globals()[gender+'_count'],10000))
 
-        result = data[(data['gender']==gender)&(data['n']>=thresh)].groupby('user').apply(lambda x: [a for a in x.idx.values if a != -1])
+        #result = data[(data['gender']==gender)&(data['n']>=thresh)].groupby('user').apply(lambda x: [a for a in x.idx.values if a != -1])
+        result = data[data['n']>=thresh].groupby('user').apply(lambda x: [a for a in x.idx.values if a != -1])
 
         # for i,indices in enumerate(result.values):
         #     mat[i,indices] = 1
@@ -122,6 +175,7 @@ if __name__ == '__main__':
 
     n_procs = int(sys.argv[1])
     main(n_procs)
+    parse()
 
 
 
