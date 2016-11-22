@@ -119,11 +119,13 @@ def comat(model_idx):
     for gender in genders:
         # randomize
         shuf_start = time.time()
-        for chunk in chunks[gender]:
+        #for chunk in chunks:
+        for chunk in chunkdict[gender]:
             artist_arr = chunk['idx'].values.copy()
             np.random.shuffle(artist_arr)
             chunk['idx'] = artist_arr
-        data = pd.concat(chunks[gender])
+        #data = pd.concat(chunks)
+        data = pd.concat(chunkdict[gender])
 
         print "Data {:04d} shuffled in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-shuf_start))))
 
