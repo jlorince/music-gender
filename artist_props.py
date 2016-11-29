@@ -1,5 +1,6 @@
 import pandas as pd
 import multiprocessing as mp
+import numpy as np
 
 filter_gender = ['m','f']
 filter_playcount = 1000
