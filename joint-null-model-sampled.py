@@ -99,14 +99,14 @@ def comat(model_idx):
 
         chunks = []
         for weight,cnt in counts_by_edge_weight.iteritems():
-            if cnt>=chunk_size:
+            if cnt>=base_chunk_size:
                 current = df[df['n']==weight].copy()
                 current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
                 chunks.append(current[['user','gender','idx','n']])
             else:
                 break
 
-        condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<chunk_size],on='n',rsuffix='_').sort_values('n')
+        condensed = df.join(counts_by_edge_weight[counts_by_edge_weight<base_chunk_size],on='n',rsuffix='_').sort_values('n')
         N = len(condensed)
 
         n_chunks = N / base_chunk_size
@@ -126,7 +126,7 @@ def comat(model_idx):
             current = condensed.iloc[i:i+chunksize].copy()
             current['idx'] = current['artist'].apply(lambda x: d.get(x,-1))
             chunks.append(current[['user','gender','idx','n']])
-            i += chunk_size
+            i += chunksize
 
         # randomize
         shuf_start = time.time()
