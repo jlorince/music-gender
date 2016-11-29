@@ -22,6 +22,7 @@ def process(fi):
 if __name__=='__main__':
     from glob import glob
     import math
+    import os
 
     user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
 
