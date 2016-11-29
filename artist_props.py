@@ -12,6 +12,7 @@ def process(fi):
     df['idx'] = df['artist_id'].apply(lambda x: d.get(x,-1))
     vc = df.idx.value_counts()
     vc = vc / float(vc.sum())
+    print fi[fi.rfind('\\')+1:fi.rfind('.')],
 
     return vc.reindex(xrange(10000),fill_value=0).values
 
