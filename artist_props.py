@@ -12,7 +12,7 @@ def process(fi):
     df = pd.read_table(fi,header=None,names=['song_id','artist_id','ts'],usecols=['artist_id'])
     df['idx'] = df['artist_id'].apply(lambda x: d.get(x,-1))
     vc = df.idx.value_counts()
-    vc = vc / float(vc.sum())
+    #vc = vc / float(vc.sum())
     print fi[fi.rfind('\\')+1:fi.rfind('.')],
 
     return vc.reindex(xrange(10000),fill_value=0).values
@@ -50,6 +50,6 @@ if __name__=='__main__':
     chunksize = int(math.ceil(len(files_f)/procs))
     result_f = np.vstack(pool.map(process,files_f,chunksize=chunksize))
 
-    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/artist_props_m.npy',result_m)
-    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/artist_props_f.npy',result_f)
+    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/artist_counts_m.npy',result_m)
+    np.save('P:/Projects/BigMusic/jared.git/music-gender/data/artist_counts_f.npy',result_f)
 
