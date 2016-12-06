@@ -16,6 +16,7 @@ artist_map = pd.read_pickle('P:/Projects/BigMusic/jared.data/artist-map-w2v-200-
 mapping = dict(zip(artist_map['id'],artist_map['idx']))
 
 
+
 def parse_df(fi,include_time=False):
     return pd.read_table(fi,header=None,names=['song_id','artist_id','ts'],usecols=['artist_id'])
 
@@ -38,7 +39,6 @@ def process(fi,thresh=10):
 
     #print fi
     return np.array(result)
-
 
 
 #files = sorted(glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*'),key=os.path.getsize,reverse=True)
