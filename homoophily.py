@@ -63,7 +63,7 @@ def wrapper(tup):
 
 if __name__ == '__main__':
 
-    total_comps = sys.argv[1]
+    total_comps = int(sys.argv[1])
 
 
     import math
