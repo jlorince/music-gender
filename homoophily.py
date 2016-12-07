@@ -6,8 +6,6 @@ import time,datetime
 import sys
 import pandas as pd
 
-total_comps = 100000
-
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
         self.desc = desc
@@ -62,6 +60,8 @@ def wrapper(tup):
 
 
 if __name__ == '__main__':
+
+    total_comps = sys.argv[1]
 
 
     import math
