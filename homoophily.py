@@ -28,16 +28,19 @@ d = 'P:/Projects/BigMusic/jared.data/'
 
 #combined = np.load('/backup/home/jared/user-artist-matrix-complete.npy')
 
-combined = np.load(d+'/user-artist-matrix-complete.npy')
+with timed('setting up user-artist matrix'):
+    combined = np.load(d+'/user-artist-matrix-complete.npy')
 
-dists = (combined / combined.sum(0,dtype=float,keepdims=True))
+    dists = (combined / combined.sum(0,dtype=float,keepdims=True))
+    combined[np.isnan(combined)] = 0
 
-n = combined.shape[1]
+    n = combined.shape[1]
 
-friendship_links = set()
-for line in open(d+'friendship-links-internal.txt'):
-    a,b = map(int,line.strip().split())
-    friendship_links.add((a,b))
+with timed('loading link data'):
+    friendship_links = set()
+    for line in open(d+'friendship-links-internal.txt'):
+        a,b = map(int,line.strip().split())
+        friendship_links.add((a,b))
 
 
 def a_entropy(arr,alpha=2):
@@ -64,7 +67,7 @@ def wrapper(tup):
     #divergence = div_norm(p,q,alpha=2)
     divergence = jsd(p,q)
     link = (a,b) in friendship_links
-    return divergence,link
+    return divergence,int(link)
 
 
 if __name__ == '__main__':
@@ -72,8 +75,7 @@ if __name__ == '__main__':
     total_comps = int(sys.argv[1])
 
 
-    import math
-    from scipy.misc import comb
+    import ma
 
     procs = mp.cpu_count()
     pool = mp.Pool(procs)
@@ -108,7 +110,7 @@ if __name__ == '__main__':
         df = pd.DataFrame(final,columns=['divergence','link'])
 
     with timed('grouping'):
-        result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.describe().unstack()
+        result = df.dropna().groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.describe().unstack()
         result.to_pickle('P:/Projects/BigMusic/jared.data/homophily-data-sampled.pkl')
 
 
