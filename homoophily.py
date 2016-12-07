@@ -1,6 +1,6 @@
 import numpy as np
-#import multiprocessing as mp
-import pathos.multiprocessing as mp
+import multiprocessing as mp
+#import pathos.multiprocessing as mp
 import itertools
 import time,datetime
 import sys
@@ -62,41 +62,46 @@ def wrapper(tup):
     return divergence,link
 
 
+if __name__ == '__main__':
 
 
-import math
-from scipy.misc import comb
+    import math
+    from scipy.misc import comb
 
-procs = mp.cpu_count()
-pool = mp.Pool(procs)
+    procs = mp.cpu_count()
+    pool = mp.Pool(procs)
 
-with timed('comparison set generation'):
-    s = set()
-    cnt = 0
-    while cnt<total_comps:
-        a = np.random.randint(0,n)
-        b = np.random.randint(0,n)
-        if a>b:
-            a,b = b,a
-        elif b==a:
-            continue
-        comb = (a,b)
+    with timed('comparison set generation'):
+        s = set()
+        cnt = 0
+        while cnt<total_comps:
+            a = np.random.randint(0,n)
+            b = np.random.randint(0,n)
+            if a>b:
+                a,b = b,a
+            elif b==a:
+                continue
+            comb = (a,b)
 
-        if comb not in s:
-            s.add(comb)
-            cnt+=1
+            if comb not in s:
+                s.add(comb)
+                cnt+=1
 
-chunksize = int(math.ceil(total_comps / float(procs)))
+    chunksize = int(math.ceil(total_comps / float(procs)))
 
-final = []
-for i,result in enumerate(pool.imap(wrapper,s,chunksize=chunksize),1):
-    final.append(result)
-    #if i%10000==0:
-    print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
+    # final = []
+    # for i,result in enumerate(pool.imap(wrapper,s,chunksize=chunksize),1):
+    #     final.append(result)
+    #     #if i%10000==0:
+    #     print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
+    with timed('parallel processing')""
+        final = pool.map(wrapper,s,chunksize=chunksize)
 
-df = pd.DataFrame(final,columns=['divergence','link'])
+    with timed('building dataframe'):
+        df = pd.DataFrame(final,columns=['divergence','link'])
 
-result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.mean()
+    with timed('grouping'):
+        result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.mean()
 
 
 

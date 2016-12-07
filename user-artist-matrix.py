@@ -6,7 +6,11 @@ import time,datetime
 from scipy import sparse
 from glob import glob
 
+# by_gender=True
+# d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
+
 by_gender=False
+d = 'P:/Projects/BigMusic/jared.data/'
 
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
