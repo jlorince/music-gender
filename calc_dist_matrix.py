@@ -68,7 +68,7 @@ if __name__=='__main__':
             if i%100000==0:
                 print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
 
-        np.save(d = '{}divergences_{}.npy'.format(gender),np.array(result))
+        np.save('{}divergences_{}.npy'.format(gender),np.array(result))
 
 
 
