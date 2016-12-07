@@ -93,7 +93,7 @@ if __name__ == '__main__':
     #     final.append(result)
     #     #if i%10000==0:
     #     print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
-    with timed('parallel processing')""
+    with timed('parallel processing'):
         final = pool.map(wrapper,s,chunksize=chunksize)
 
     with timed('building dataframe'):
