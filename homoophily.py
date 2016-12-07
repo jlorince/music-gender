@@ -24,11 +24,10 @@ class timed(object):
 
 
 #d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
-d = '/backup/home/jared/music-gender/'
-counts_m = np.load(d+'user-artist-matrix-m.npy')
-counts_f = np.load(d+'user-artist-matrix-f.npy')
+#d = '/backup/home/jared/music-gender/'
 
-combined = np.hstack([counts_m,counts_f])
+#combined = np.load('/backup/home/jared/user-artist-matrix-complete.npy')
+combined = np.load('P:/Projects/BigMusic/jared.data/user-artist-matrix-complete.npy')
 
 dists = (combined / combined.sum(0,dtype=float,keepdims=True))
 
@@ -53,7 +52,7 @@ def div_norm(p,q,alpha=2):
     return div(p,q,alpha) / div_max(p,q,alpha)
 
 def wrapper(tup):
-    print tup
+    #print tup
     a,b = tup
     p = dists[:,a]
     q = dists[:,b]
@@ -101,7 +100,8 @@ if __name__ == '__main__':
         df = pd.DataFrame(final,columns=['divergence','link'])
 
     with timed('grouping'):
-        result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.mean()
+        result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.describe().unstack()
+        result.to_pickle('P:/Projects/BigMusic/jared.data/homophily-data-sampled.pkl')
 
 
 
