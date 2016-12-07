@@ -28,6 +28,7 @@ counts_f = np.load(d+'user-artist-matrix-f.npy')
 
 dists_m = (counts_m / counts_m.sum(1,dtype=float,keepdims=True))
 dists_f = (counts_f / counts_f.sum(1,dtype=float,keepdims=True))
+dists_f[np.isnan(dists_f)] = 0
 
 def a_entropy(arr,alpha=2):
     return (1./(1.-alpha)) * ((arr**alpha).sum()-1.0)
@@ -46,6 +47,7 @@ def jsd(p,q,b=2):
     return 0.5*entropy(p,m,base=b) + 0.5*entropy(q,m,base=b)
 
 def wrapper_f(tup):
+    print tup
     i_p,i_q = tup
     p = dists_f[i_p]
     q = dists_f[i_q]
@@ -53,6 +55,7 @@ def wrapper_f(tup):
     return jsd(p,q)
 
 def wrapper_m(tup):
+    print tup
     i_p,i_q = tup
     p = dists_m[i_p]
     q = dists_m[i_q]
@@ -73,12 +76,14 @@ if __name__=='__main__':
     for gender in ('m','f'):
 
         f = {'m':wrapper_m,'f':wrapper_f}[gender]
-        result = []
+        
+        # result = []
+        # for i,divergence in enumerate(pool.imap(f,itertools.combinations(xrange(10000),2),chunksize=chunksize),1):
+        #     result.append(divergence)
+        #     #if i%100000==0:
+        #     print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
+        result = pool.map(f,itertools.combinations(xrange(10000),2),chunksize=chunksize)
 
-        for i,divergence in enumerate(pool.imap(f,itertools.combinations(xrange(10000),2),chunksize=chunksize),1):
-            result.append(divergence)
-            #if i%100000==0:
-            print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
 
         np.save('{}divergences_{}.npy'.format(d,gender),np.array(result))
 
