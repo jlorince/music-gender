@@ -47,7 +47,7 @@ def jsd(p,q,b=2):
     return 0.5*entropy(p,m,base=b) + 0.5*entropy(q,m,base=b)
 
 def wrapper_f(tup):
-    print tup
+    #print tup
     i_p,i_q = tup
     p = dists_f[i_p]
     q = dists_f[i_q]
@@ -55,7 +55,7 @@ def wrapper_f(tup):
     return jsd(p,q)
 
 def wrapper_m(tup):
-    print tup
+    #print tup
     i_p,i_q = tup
     p = dists_m[i_p]
     q = dists_m[i_q]

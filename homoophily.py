@@ -23,9 +23,11 @@ class timed(object):
 
 #d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
 #d = '/backup/home/jared/music-gender/'
+d = 'P:/Projects/BigMusic/jared.data/'
 
 #combined = np.load('/backup/home/jared/user-artist-matrix-complete.npy')
-combined = np.load('P:/Projects/BigMusic/jared.data/user-artist-matrix-complete.npy')
+
+combined = np.load(d+'/user-artist-matrix-complete.npy')
 
 dists = (combined / combined.sum(0,dtype=float,keepdims=True))
 
