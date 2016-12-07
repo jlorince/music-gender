@@ -5,6 +5,7 @@ import itertools
 import time,datetime
 import sys
 import pandas as pd
+from scipy.stats import entropy
 
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
@@ -51,12 +52,17 @@ def div_max(p,q,alpha=2):
 def div_norm(p,q,alpha=2):
     return div(p,q,alpha) / div_max(p,q,alpha)
 
+def jsd(p,q,b=2):
+    m = (p+q)/2.
+    return 0.5*entropy(p,m,base=b) + 0.5*entropy(q,m,base=b)
+
 def wrapper(tup):
     #print tup
     a,b = tup
     p = dists[:,a]
     q = dists[:,b]
-    divergence = div_norm(p,q,alpha=2)
+    #divergence = div_norm(p,q,alpha=2)
+    divergence = jsd(p,q)
     link = (a,b) in friendship_links
     return divergence,link
 
