@@ -65,12 +65,12 @@ if __name__=='__main__':
         f = {'m':wrapper_m,'f':wrapper_f}[gender]
         result = []
 
-        for i,divergence in enumerate(pool.imap(f,itertools.combinations(10000,2),chunksize=chunksize),1):
+        for i,divergence in enumerate(pool.imap(f,itertools.combinations(xrange(10000),2),chunksize=chunksize),1):
             result.append(divergence)
             if i%100000==0:
                 print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
 
-        np.save('{}divergences_{}.npy'.format(gender),np.array(result))
+        np.save('{}divergences_{}.npy'.format(d,gender),np.array(result))
 
 
 
