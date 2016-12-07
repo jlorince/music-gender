@@ -1,9 +1,10 @@
 import numpy as np
-#import multiprocessing as mp
-import pathos.multiprocessing as mp
+import multiprocessing as mp
+#import pathos.multiprocessing as mp
 import itertools
 import time,datetime
 import sys
+from scipy.stats import entropy
 
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
@@ -40,17 +41,23 @@ def div_max(p,q,alpha=2):
 def div_norm(p,q,alpha=2):
     return div(p,q,alpha) / div_max(p,q,alpha)
 
+def jsd(p,q,b=2):
+    m = (p+q)/2.
+    return 0.5*entropy(p,m,base=b) + 0.5*entropy(q,m,base=b)
+
 def wrapper_f(tup):
     i_p,i_q = tup
     p = dists_f[i_p]
     q = dists_f[i_q]
-    return div_norm(p,q,alpha=2)
+    #return div_norm(p,q,alpha=2)
+    return jsd(p,q)
 
 def wrapper_m(tup):
     i_p,i_q = tup
     p = dists_m[i_p]
     q = dists_m[i_q]
-    return div_norm(p,q,alpha=2)
+    #return div_norm(p,q,alpha=2)
+    return jsd(p,q)
 
 
 if __name__=='__main__':
@@ -61,7 +68,7 @@ if __name__=='__main__':
     pool = mp.Pool(procs)
 
     total_comps = comb(10000,2)
-    chunksize = int(math.ceil(total_comps/procs))
+    chunksize = int(math.ceil(total_comps / float(n_procs)))
     
     for gender in ('m','f'):
 
@@ -70,8 +77,8 @@ if __name__=='__main__':
 
         for i,divergence in enumerate(pool.imap(f,itertools.combinations(xrange(10000),2),chunksize=chunksize),1):
             result.append(divergence)
-            if i%100000==0:
-                print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
+            #if i%100000==0:
+            print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
 
         np.save('{}divergences_{}.npy'.format(d,gender),np.array(result))
 

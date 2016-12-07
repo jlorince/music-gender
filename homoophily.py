@@ -63,42 +63,42 @@ def wrapper(tup):
 
 
 
-if __name__=='__main__':
-    import math
-    from scipy.misc import comb
 
-    procs = mp.cpu_count()
-    pool = mp.Pool(procs)
+import math
+from scipy.misc import comb
 
-    with timed('comparison set generation'):
-        s = set()
-        cnt = 0
-        while cnt<total_comps:
-            a = np.random.randint(0,n)
-            b = np.random.randint(0,n)
-            if a>b:
-                a,b = b,a
-            elif b==a:
-                continue
-            comb = (a,b)
+procs = mp.cpu_count()
+pool = mp.Pool(procs)
 
-            if comb not in s:
-                s.add(comb)
-                cnt+=1
+with timed('comparison set generation'):
+    s = set()
+    cnt = 0
+    while cnt<total_comps:
+        a = np.random.randint(0,n)
+        b = np.random.randint(0,n)
+        if a>b:
+            a,b = b,a
+        elif b==a:
+            continue
+        comb = (a,b)
 
-    chunksize = int(math.ceil(total_comps/procs))
+        if comb not in s:
+            s.add(comb)
+            cnt+=1
 
-    final = []
-    for i,result in enumerate(pool.imap(wrapper,s,chunksize=chunksize),1):
-        final.append(result)
-        #if i%10000==0:
-        print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
+int(math.ceil(total_comps / float(n_procs)))
 
-    df = pd.DataFrame(final,columns=['divergence','link'])
+final = []
+for i,result in enumerate(pool.imap(wrapper,s,chunksize=chunksize),1):
+    final.append(result)
+    #if i%10000==0:
+    print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
 
-    result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.mean()
-    
-    
+df = pd.DataFrame(final,columns=['divergence','link'])
+
+result = df.groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.mean()
+
+
 
 
 
