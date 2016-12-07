@@ -55,6 +55,8 @@ if __name__=='__main__':
     from scipy.misc import comb
 
     procs = mp.cpu_count()
+    pool = mp.Pool(procs)
+
     total_comps = comb(10000,2)
     chunksize = int(math.ceil(total_comps/procs))
     
