@@ -22,7 +22,7 @@ class timed(object):
 
 
 #d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
-d = '/backup/home/jared/music-gender/'
+d = '/backup/home/jared/music-gender/data/'
 counts_m = np.load(d+'user-artist-matrix-m.npy')
 counts_f = np.load(d+'user-artist-matrix-f.npy')
 
