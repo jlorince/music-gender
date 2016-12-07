@@ -1,6 +1,22 @@
 import numpy as np
 import multiprocessing as mp
 import itertools
+import time,datetime
+
+class timed(object):
+    def __init__(self,desc='command',pad='',**kwargs):
+        self.desc = desc
+        self.kwargs = kwargs
+        self.pad = pad
+    def __enter__(self):
+        self.start = time.time()
+        print '{} started...'.format(self.desc)
+    def __exit__(self, type, value, traceback):
+        if len(self.kwargs)==0:
+            print '{}{} complete in {}{}'.format(self.pad,self.desc,str(datetime.timedelta(seconds=time.time()-self.start)),self.pad)
+        else:
+            print '{}{} complete in {} ({}){}'.format(self.pad,self.desc,str(datetime.timedelta(seconds=time.time()-self.start)),','.join(['{}={}'.format(*kw) for kw in self.kwargs.iteritems()]),self.pad)
+
 
 d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
 counts_m = np.load(d+'user-artist-matrix-m.npy')
@@ -21,8 +37,16 @@ def div_max(p,q,alpha=2):
 def div_norm(p,q,alpha=2):
     return div(p,q,alpha) / div_max(p,q,alpha)
 
-def wrapper(tup):
-    p,q = tup
+def wrapper_f(tup):
+    i_p,i_q = tup
+    p = dists_f[i_p]
+    q = dists_f[i_q]
+    return div_norm(p,q,alpha=2)
+
+def wrapper_m(tup):
+    i_p,i_q = tup
+    p = dists_m[i_p]
+    q = dists_m[i_q]
     return div_norm(p,q,alpha=2)
 
 
@@ -33,11 +57,19 @@ if __name__=='__main__':
     procs = mp.cpu_count()
     total_comps = comb(10000,2)
     chunksize = int(math.ceil(total_comps/procs))
+    
+    for gender in ('m','f'):
 
-    result = []
-    for i,divergence in enumerate(pool.imap(div_norm,itertools.combinations(10000,2),chunksize=chunksize),1):
-        result.append(divergence)
-        if i%100000==0:
-            print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
+        f = {'m':wrapper_m,'f':wrapper_f}[gender]
+        result = []
+
+        for i,divergence in enumerate(pool.imap(f,itertools.combinations(10000,2),chunksize=chunksize),1):
+            result.append(divergence)
+            if i%100000==0:
+                print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/total_comps))
+
+        np.save(d = '{}divergences_{}.npy'.format(gender),np.array(result))
+
+
 
 
