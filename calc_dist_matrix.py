@@ -68,7 +68,7 @@ if __name__=='__main__':
     pool = mp.Pool(procs)
 
     total_comps = comb(10000,2)
-    chunksize = int(math.ceil(total_comps / float(n_procs)))
+    chunksize = int(math.ceil(total_comps / float(procs)))
     
     for gender in ('m','f'):
 

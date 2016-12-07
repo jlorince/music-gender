@@ -86,7 +86,7 @@ with timed('comparison set generation'):
             s.add(comb)
             cnt+=1
 
-int(math.ceil(total_comps / float(n_procs)))
+chunksize = int(math.ceil(total_comps / float(procs)))
 
 final = []
 for i,result in enumerate(pool.imap(wrapper,s,chunksize=chunksize),1):
