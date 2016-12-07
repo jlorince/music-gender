@@ -75,7 +75,7 @@ if __name__ == '__main__':
     total_comps = int(sys.argv[1])
 
 
-    import ma
+    import math
 
     procs = mp.cpu_count()
     pool = mp.Pool(procs)
