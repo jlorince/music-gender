@@ -6,6 +6,8 @@ import time,datetime
 from scipy import sparse
 from glob import glob
 
+by_gender=False
+
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
         self.desc = desc
@@ -39,34 +41,49 @@ if __name__=='__main__':
 
     with timed('file list setup'):
 
-        gender_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_gender')
-        ids_m = set(gender_data[gender_data['gender']=='m']['user_id'])
-        ids_f = set(gender_data[gender_data['gender']=='f']['user_id'])
-
         all_files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
-        files_m = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
-        files_f = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_f],key=os.path.getsize,reverse=True)
-        n_m = len(files_m)
-        n_f = len(files_f)
+
+        if by_gender:
+            gender_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_gender')
+            ids_m = set(gender_data[gender_data['gender']=='m']['user_id'])
+            ids_f = set(gender_data[gender_data['gender']=='f']['user_id'])
+
+            
+            files_m = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
+            files_f = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_f],key=os.path.getsize,reverse=True)
+            n_m = len(files_m)
+            n_f = len(files_f)
 
     with timed('pool setup'):
         start = time.time()
         n_procs = mp.cpu_count()
         pool = mp.Pool(n_procs)
+
+    if by_gender:
     
-    with timed('main run (males)'):
-        chunksize = int(math.ceil(len(files_m) / float(n_procs)))
-        result_m = np.hstack(pool.map(process,files_m,chunksize=chunksize))
-        print result_m.shape
+        with timed('main run (males)'):
+            chunksize = int(math.ceil(len(files_m) / float(n_procs)))
+            result_m = np.hstack(pool.map(process,files_m,chunksize=chunksize))
+            print result_m.shape
 
-    with timed('main run (females)'):
-        chunksize = int(math.ceil(len(files_f) / float(n_procs)))
-        result_f = np.hstack(pool.map(process,files_f,chunksize=chunksize))
-        print result_f.shape
+        with timed('main run (females)'):
+            chunksize = int(math.ceil(len(files_f) / float(n_procs)))
+            result_f = np.hstack(pool.map(process,files_f,chunksize=chunksize))
+            print result_f.shape
 
-    with timed('saving data'):
-        d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
-        np.save(d+'user-artist-matrix-m.npy',result_m)
-        np.save(d+'user-artist-matrix-f.npy',result_f)
+        with timed('saving data'):
+            d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
+            np.save(d+'user-artist-matrix-m.npy',result_m)
+            np.save(d+'user-artist-matrix-f.npy',result_f)
+
+    else:
+
+        with timed('main run'):
+            chunksize = int(math.ceil(len(all_files) / float(n_procs)))
+            result = np.hstack(pool.map(process,all_files,chunksize=chunksize))
+            print result.shape
+        with timed('saving data'):
+            np.save(d+'user-artist-matrix-complete.npy',result)
+
 
 
