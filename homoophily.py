@@ -1,6 +1,6 @@
 import numpy as np
-import multiprocessing as mp
-#import pathos.multiprocessing as mp
+#import multiprocessing as mp
+import pathos.multiprocessing as mp
 import itertools
 import time,datetime
 import sys
@@ -23,8 +23,8 @@ class timed(object):
 
 
 #d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
-#d = '/backup/home/jared/music-gender/'
-d = 'P:/Projects/BigMusic/jared.data/'
+d = '/backup/home/jared/music-gender/data/'
+#d = 'P:/Projects/BigMusic/jared.data/'
 
 #combined = np.load('/backup/home/jared/user-artist-matrix-complete.npy')
 
@@ -73,12 +73,13 @@ def wrapper(tup):
 if __name__ == '__main__':
 
     total_comps = int(sys.argv[1])
-
+    #total_comps = 100000000
 
     import math
 
-    procs = mp.cpu_count()
-    pool = mp.Pool(procs)
+    with timed('pool spiniup'):
+        procs = mp.cpu_count()
+        pool = mp.Pool(procs)
 
     with timed('comparison set generation'):
         s = set()
@@ -105,13 +106,20 @@ if __name__ == '__main__':
     #     print "{}/{} ({:.2f}% complete)".format(i,total_comps,100*(i/float(total_comps)))
     with timed('parallel processing'):
         final = pool.map(wrapper,s,chunksize=chunksize)
+        # final = []
+        # for i,tup in enumerate(s,1):
+        #     final.append(wrapper(tup))
+        #     if i%100000==0:
+        #         print "{}/{} ({:.2f}% complete)".format(i,int(total_comps),100*(i/float(total_comps)))
+
 
     with timed('building dataframe'):
         df = pd.DataFrame(final,columns=['divergence','link'])
 
     with timed('grouping'):
         result = df.dropna().groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.describe().unstack()
-        result.to_pickle('P:/Projects/BigMusic/jared.data/homophily-data-sampled.pkl')
+        #result.to_pickle('P:/Projects/BigMusic/jared.data/homophily-data-sampled.pkl')
+        result.to_pickle(d+'homophily-data-sampled.pkl')
 
 
 
