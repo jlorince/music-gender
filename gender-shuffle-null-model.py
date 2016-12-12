@@ -85,8 +85,6 @@ def comat(model_idx):
         with timed("Co-occurrence matrix {:04d} (f)".format(model_idx)):
             co_f = data_f.T.dot(data_f)
 
-    print "Null model {:04d} complete in {}".format(model_idx,str(datetime.timedelta(seconds=(time.time()-start))))
-
     return co_m,co_f
 
 def main(n_procs):
@@ -135,7 +133,7 @@ def main(n_procs):
 
 if __name__ != '__main__':
 
-    with timed('initial data setup'):
+    with timed('initial data setup (pid={})'.format(os.getpid())):
         d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
         #d = '/backup/home/jared/music-gender/data/'
         counts_m = np.load(d+'user-artist-matrix-m.npy')
