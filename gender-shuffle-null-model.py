@@ -106,7 +106,7 @@ def main(n_procs,func):
             n = 0
 
         for i,(co_m,co_f) in enumerate(pool.imap(comat,xrange(1000))):
-            with timed('processing results for idx {}'.format(i))
+            with timed('processing results for idx {}'.format(i)):
                 n+=1
                 delta_m = co_m - mean_m
                 mean_m += (delta_m / n)
