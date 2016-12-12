@@ -89,7 +89,7 @@ def comat(model_idx):
 
     return co_m,co_f
 
-def main(n_procs,func):
+def main(n_procs):
     original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     pool = mp.Pool(n_procs)
     signal.signal(signal.SIGINT, original_sigint_handler)
