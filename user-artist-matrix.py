@@ -46,6 +46,7 @@ if __name__=='__main__':
     with timed('file list setup'):
 
         all_files = glob('p:/Projects/BigMusic/jared.IU/scrobbles-complete/*')
+        ids = [f[f.rfind('\\')+1:-4] for f in all_files]
 
         if by_gender:
             gender_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_gender')
@@ -88,6 +89,8 @@ if __name__=='__main__':
             print result.shape
         with timed('saving data'):
             np.save(d+'user-artist-matrix-complete.npy',result)
+            with open(d+'user-artist-matrix-id-idx','w') as out:
+                out.write('\n'.join(ids)+'\n')
 
 
 

@@ -6,6 +6,9 @@ import time,datetime
 import sys
 import pandas as pd
 from scipy.stats import entropy
+from scipy.spatial.distance import cosine
+
+found = 0
 
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
@@ -60,20 +63,25 @@ def jsd(p,q,b=2):
     return 0.5*entropy(p,m,base=b) + 0.5*entropy(q,m,base=b)
 
 def wrapper(tup):
+    global found
     #print tup
     a,b = tup
     p = dists[:,a]
     q = dists[:,b]
     #divergence = div_norm(p,q,alpha=2)
-    divergence = jsd(p,q)
-    link = (a,b) in friendship_links
+    #divergence = jsd(p,q)
+    dist = cosine(p,q)
+    link = tup in friendship_links
+    if link is True:
+        found += 1
+        print '{} links encountered'.format(found)
     return divergence,int(link)
 
 
 if __name__ == '__main__':
 
     #total_comps = int(sys.argv[1])
-    total_comps = 10000000
+    total_comps = 100000000
 
     # import math
 
