@@ -93,7 +93,7 @@ if __name__=='__main__':
         sample_size = (len(user_data[(user_data.floor_logn==maxbin)&(user_data.gender=='f')]) / 10.) *2
         perc_mult = sample_size / bin_weights.ix[maxbin]
         bucket_sizes = bin_weights * perc_mult
-        per_bucket_gender_count = np.round(bucket_sizes/2).astype(int).sort_index().values
+        per_bucket_gender_counts = np.round(bucket_sizes/2).astype(int).sort_index().values
         user_data = user_data.set_index('user_id')
 
         ## Generate male and female playcounts
