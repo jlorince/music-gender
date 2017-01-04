@@ -35,8 +35,8 @@ def create_pop_sample(seed=None):
     for bucket,grp in user_data.groupby('floor_logn'):
         #users+=(list(np.random.choice(grp[grp.gender=='m'].user_id,per_bucket_gender_counts[bucket])))
         #users+=(list(np.random.choice(grp[grp.gender=='f'].user_id,per_bucket_gender_counts[bucket])))
-        user_playcounts+=(list(np.random.choice(grp[grp.gender=='m'].sample_playcount,per_bucket_gender_counts[bucket])))
-        user_playcounts+=(list(np.random.choice(grp[grp.gender=='f'].sample_playcount,per_bucket_gender_counts[bucket])))
+        user_playcounts+=(list(np.random.choice(grp[grp.gender=='m'].n,per_bucket_gender_counts[bucket])))
+        user_playcounts+=(list(np.random.choice(grp[grp.gender=='f'].n,per_bucket_gender_counts[bucket])))
     #return users
     return user_playcounts
 
