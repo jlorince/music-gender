@@ -40,19 +40,23 @@ def create_pop_sample(seed=None):
     #return users
     return user_playcounts
 
-def run_bootstrap(idx,f,mode):
+def run_bootstrap(idx,mode):
     with timed('Running bootstrap idx {} ({}, {})'.format(idx,str(f).split()[1],mode)):
-        result = []
+        result = [[]]*len(funcs)
         with timed('Getting playcounts (idx={})'.format(idx)):
             playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
             listening = np.random.multinomial(u,artist_probs)
-            result.append(f(listening))
-        return numpy.mean(result)
+            for i,f in enumerate(funcs):
+                result[i].append(f(listening))
+        return [numpy.mean(r) for r in result]
 
-def calc_zscore(f,user_data):
+def calc_zscore(user_data):
     user_id,df = user_data
-    return user_id,df.gender.iloc[0],(f(df.n)-bs_mean)/bs_std
+    result = []
+    for i,f in enumerate(funcs):
+        result.append((f(df.n)-bs_data[i][0])/bs_data[i][1])
+    return [user_id,df.gender.iloc[0]]+result
 
 ###############################
 ########### Metrics ###########
@@ -77,13 +81,14 @@ def unique_artists_norm(arr):
 def unique_artists(arr):
     return float(len(arr))
 
-def entropy(arr)
+def entropy(arr):
+    return thoth.calc_entropy(arr,1000)[0]
 
 if __name__=='__main__':
 
     try:
         funckeys = sys.argv[1:]
-        funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm}[funckey] for f in funkeys]
+        funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm}[funckey] for f in funckeys]
     except KeyError:
         raise Exception("Must provide a valid function name")
 
@@ -124,17 +129,16 @@ if __name__=='__main__':
     chunksize = int(math.ceil(n_runs / float(procs)))
 
     for mode in ('n','m','f'):
-        func_partial = partial(run_bootstrap,f=func,mode='n')
+        func_partial = partial(run_bootstrap,f=funcs,mode='n')
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
-            result = pool.map(func_partial,xrange(n_runs))
-            bs_mean = np.mean(result)
-            bs_std = np.std(result)
+            results = zip(*pool.map(func_partial,xrange(n_runs)))
+            bs_data = [(np.mean(r),np.std(r)) for r in results]
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
             if mode =='n':
                 zscores = pool.map(calc_zscore,user_artist_df.groupby('user_id'))
             else:
                 zscores = pool.map(calc_zscore,user_artist_df[user_artist_df.gender==mode].groupby('user_id'))
-            with open(datadir+'sampled_gender_results/{}_{}'.format(funckey,mode),'w') as fout:
-                for user,gender,zscore in zscore:
-                    fout.write("{}\t{}\t{}\n".format(user,gender,zscore))
+            with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join(funckeys),mode),'w') as fout:
+                for result in zscore:
+                    fout.write('\t'.join(map(str,result)+'\n')
