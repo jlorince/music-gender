@@ -56,6 +56,10 @@ if __name__=='__main__':
             
             files_m = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_m],key=os.path.getsize,reverse=True)
             files_f = sorted([f for f in all_files if int(f[f.rfind('\\')+1:f.rfind('.')]) in ids_f],key=os.path.getsize,reverse=True)
+
+            ids_m = [f[f.rfind('\\')+1:-4] for f in files_m]
+            ids_f = [f[f.rfind('\\')+1:-4] for f in files_f]
+
             n_m = len(files_m)
             n_f = len(files_f)
 
@@ -80,6 +84,10 @@ if __name__=='__main__':
             d = 'P:/Projects/BigMusic/jared.git/music-gender/data/'
             np.save(d+'user-artist-matrix-m.npy',result_m)
             np.save(d+'user-artist-matrix-f.npy',result_f)
+            with open(d+'user-artist-matrix-id-idx-male','w') as out:
+                out.write('\n'.join(ids_m)+'\n')
+            with open(d+'user-artist-matrix-id-idx-female','w') as out:
+                out.write('\n'.join(ids_f)+'\n')
 
     else:
 

@@ -29,13 +29,15 @@ class timed(object):
 #d = '/backup/home/jared/music-gender/data/'
 d = 'P:/Projects/BigMusic/jared.data/'
 
+id_idx = {int(line.strip()):i for i,line in enumerate(open(d+'user-artist-matrix-id-idx'))}
+
 #combined = np.load('/backup/home/jared/user-artist-matrix-complete.npy')
 
 with timed('setting up user-artist matrix'):
-    combined = np.load(d+'/user-artist-matrix-complete.npy')
+    combined = np.load(d+'/user-artist-matrix-complete.npy').T
 
-    dists = (combined / combined.sum(0,dtype=float,keepdims=True))
-    combined[np.isnan(combined)] = 0
+    #dists = (combined / combined.sum(0,dtype=float,keepdims=True))
+    #combined[np.isnan(combined)] = 0
 
     n = combined.shape[1]
 
@@ -43,6 +45,10 @@ with timed('loading link data'):
     friendship_links = set()
     for line in open(d+'friendship-links-internal.txt'):
         a,b = map(int,line.strip().split())
+        a = id_idx[a]
+        b = id_idx[b]
+        if a>b:
+            a,b = b,a
         friendship_links.add((a,b))
 
 
@@ -66,8 +72,8 @@ def wrapper(tup):
     global found
     #print tup
     a,b = tup
-    p = dists[:,a]
-    q = dists[:,b]
+    p = combined[a]
+    q = combined[b]
     #divergence = div_norm(p,q,alpha=2)
     #divergence = jsd(p,q)
     dist = cosine(p,q)
@@ -75,13 +81,13 @@ def wrapper(tup):
     if link is True:
         found += 1
         print '{} links encountered'.format(found)
-    return divergence,int(link)
+    return dist,int(link)
 
 
 if __name__ == '__main__':
 
     #total_comps = int(sys.argv[1])
-    total_comps = 100000000
+    total_comps = 10000000
 
     # import math
 
@@ -122,10 +128,10 @@ if __name__ == '__main__':
 
 
     with timed('building dataframe'):
-        df = pd.DataFrame(final,columns=['divergence','link'])
+        df = pd.DataFrame(final,columns=['dist','link'])
 
     with timed('grouping'):
-        result = df.dropna().groupby(np.digitize(df['divergence'],bins=np.arange(0,1,.01))).link.describe().unstack()
+        result = df.dropna().groupby(np.digitize(df['dist'].dropna(),bins=np.arange(0,1,.01))).link.describe().unstack()
         #result.to_pickle('P:/Projects/BigMusic/jared.data/homophily-data-sampled.pkl')
         #result.to_pickle(d+'homophily-data-sampled.pkl')
 
