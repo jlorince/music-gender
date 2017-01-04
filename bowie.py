@@ -141,4 +141,4 @@ if __name__=='__main__':
                 zscores = pool.map(calc_zscore,user_artist_df[user_artist_df.gender==mode].groupby('user_id'))
             with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join(funckeys),mode),'w') as fout:
                 for result in zscore:
-                    fout.write('\t'.join(map(str,result)+'\n')
+                    fout.write('\t'.join(map(str,result))+'\n')
