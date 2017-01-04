@@ -99,7 +99,7 @@ if __name__=='__main__':
 
     ## Generate empirical multinomial distribution
     with timed('artist distribution setup'):
-        if os.path.exists('P:/Projects/BigMusic/jared.data/artist_probs.npy')
+        if os.path.exists('P:/Projects/BigMusic/jared.data/artist_probs.npy'):
             artist_probs = np.load('P:/Projects/BigMusic/jared.data/artist_probs.npy')
         else:
             user_artist_df = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
