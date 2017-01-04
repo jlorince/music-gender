@@ -72,7 +72,7 @@ if __name__=='__main__':
 
     try:
         funckey = sys.argv[1]
-        func = {'gini':gini,'unique_artists':unique_artists,'unique_artists_norm',unique_artists_norm}[funckey]
+        func = {'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm}[funckey]
     except KeyError:
         raise("Must provide a valid function name")
 
