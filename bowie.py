@@ -49,7 +49,7 @@ def run_bootstrap(idx,mode):
             listening = np.random.multinomial(u,artist_probs)
             for i,f in enumerate(funcs):
                 result[i].append(f(listening))
-        return [numpy.mean(r) for r in result]
+        return [np.mean(r) for r in result]
 
 def calc_zscore(user_data):
     user_id,df = user_data
