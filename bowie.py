@@ -51,7 +51,7 @@ def run_bootstrap(idx,mode):
                 result[i].append(f(listening))
         return [np.mean(r) for r in result]
 
-def calc_zscore(user_data):
+def calc_zscore(user_data,bs_data):
     user_id,df = user_data
     result = []
     for i,f in enumerate(funcs):
@@ -135,10 +135,11 @@ if __name__=='__main__':
             bs_data = [(np.mean(r),np.std(r)) for r in results]
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
+            func_partial = partial(calc_zscore,bs_data=bs_data)
             if mode =='n':
-                zscores = pool.map(calc_zscore,user_artist_df[:1000000].groupby('user_id'))
+                zscores = pool.map(func_partial,user_artist_df[:1000000].groupby('user_id'))
             else:
-                zscores = pool.map(calc_zscore,user_artist_df[user_artist_df.gender==mode][:1000000].groupby('user_id'))
+                zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode][:1000000].groupby('user_id'))
             with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join(funckeys),mode),'w') as fout:
                 for result in zscore:
                     fout.write('\t'.join(map(str,result))+'\n')
