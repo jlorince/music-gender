@@ -41,8 +41,10 @@ def create_pop_sample(seed=None):
 def run_bootstrap(idx,f,mode):
     with timed('Running bootstrap idx {} ({}, {})'.format(idx,str(f).split()[1],mode)):
         result = []
-        playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
+        with timed('Getting playcounts (idx={})'.format(idx)):
+            playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
+            print u
             listening = np.random.multinomial(u,artist_probs)
             result.append(f(listening))
         return numpy.mean(result)
@@ -58,7 +60,8 @@ def gini(array):
     """Calculate the Gini coefficient of a numpy array."""
     # based on bottom eq: http://www.statsdirect.com/help/content/image/stat0206_wmf.gif
     # from: http://www.statsdirect.com/help/default.htm#nonparametric_methods/gini.htm
-    array = array.flatten() #all values are treated equally, arrays must be 1d
+    #array = array.flatten() #all values are treated equally, arrays must be 1d
+    array = array[array>0]
     if np.amin(array) < 0:
         array -= np.amin(array) #values cannot be negative
     #array += 0.0000001 #values cannot be 0
