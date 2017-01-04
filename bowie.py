@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import sys,math,itertools,os
+import pandas as pd
 
 import time,datetime
 class timed(object):
@@ -74,7 +75,7 @@ if __name__=='__main__':
         funckey = sys.argv[1]
         func = {'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm}[funckey]
     except KeyError:
-        raise("Must provide a valid function name")
+        raise Exception("Must provide a valid function name")
 
     
     with timed('sampling setup'):
