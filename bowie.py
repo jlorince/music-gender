@@ -101,7 +101,7 @@ if __name__=='__main__':
     with timed('artist distribution setup'):
         user_artist_df = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
         artist_counts = user_artist_df.groupby('artist').n.sum()
-        artist_probs = artist_counts / float(artist_counts.sum()).values
+        artist_probs = (artist_counts / float(artist_counts.sum())).values
 
     procs = mp.cpu_count()
     pool = mp.Pool(procs)
