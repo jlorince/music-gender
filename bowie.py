@@ -129,7 +129,7 @@ if __name__=='__main__':
     chunksize = int(math.ceil(n_runs / float(procs)))
 
     for mode in ('n','m','f'):
-        func_partial = partial(run_bootstrap,f=funcs,mode='n')
+        func_partial = partial(run_bootstrap,mode='n')
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
             results = zip(*pool.map(func_partial,xrange(n_runs)))
             bs_data = [(np.mean(r),np.std(r)) for r in results]
