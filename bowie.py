@@ -34,7 +34,7 @@ def create_pop_sample(seed=None):
     return user_playcounts
 
 def run_bootstrap(idx,f,mode):
-    with timed('Running bootstrap idx {} ({}, {})'.format(idx,str(f).split()[1],mode))
+    with timed('Running bootstrap idx {} ({}, {})'.format(idx,str(f).split()[1],mode)):
         result = []
         playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
