@@ -110,7 +110,7 @@ if __name__=='__main__':
     pool = mp.Pool(procs)
     
     n_runs = 10000
-    chunksize = int(math.ceil(n_runs / float(args.procs)))
+    chunksize = int(math.ceil(n_runs / float(procs)))
 
     for mode in ('n','m','f'):
         func_partial = partial(run_bootstrap,f=func,mode='n')
