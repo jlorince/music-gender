@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from functools import partial
 
+datadir = '/backup/home/jared/storage/music-gender-data/'
+
 import time,datetime
 class timed(object):
     def __init__(self,desc='command',pad='',**kwargs):
@@ -83,7 +85,7 @@ if __name__=='__main__':
     with timed('sampling setup'):
 
         ## Generate per-bucket counts
-        user_data = pd.read_table('P:/Projects/BigMusic/jared.data/user_scrobble_counts_by_gender')
+        user_data = pd.read_table(datadir+'user_scrobble_counts_by_gender')
         user_data['floor_logn'] = user_data.sample_playcount.apply(lambda x: int(np.log10(x)))
         bin_counts = user_data.floor_logn.value_counts()
         bin_weights = bin_counts / float(bin_counts.sum())
@@ -100,10 +102,10 @@ if __name__=='__main__':
 
     ## Generate empirical multinomial distribution
     with timed('artist distribution setup'):
-        if os.path.exists('P:/Projects/BigMusic/jared.data/artist_probs.npy'):
-            artist_probs = np.load('P:/Projects/BigMusic/jared.data/artist_probs.npy')
+        if os.path.exists(datadir+'artist_probs.npy'):
+            artist_probs = np.load(datadir+'artist_probs.npy')
         else:
-            user_artist_df = pd.read_table('P:/Projects/BigMusic/jared.data/user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
+            user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
             artist_counts = user_artist_df.groupby('artist').n.sum()
             artist_probs = (artist_counts / float(artist_counts.sum())).values
 
@@ -125,16 +127,6 @@ if __name__=='__main__':
                 zscores = pool.map(calc_zscore,user_artist_df.groupby('user_id'))
             else:
                 zscores = pool.map(calc_zscore,user_artist_df[user_artist_df.gender==mode].groupby('user_id'))
-            with open('P:/Projects/BigMusic/gender_results/{}_{}'.format(funckey,mode),'w') as fout:
+            with open(datadir+'sampled_gender_results/{}_{}'.format(funckey,mode),'w') as fout:
                 for user,gender,zscore in zscore:
                     fout.write("{}\t{}\t{}\n".format(user,gender,zscore))
-
-
-
-
-
-
-
-
-
-    # generate 'Bowie null'
