@@ -88,7 +88,7 @@ if __name__=='__main__':
 
     try:
         funckeys = sys.argv[1:]
-        funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm}[funckey] for f in funckeys]
+        funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm,'entropy':entropy}[f] for f in funckeys]
     except KeyError:
         raise Exception("Must provide a valid function name")
 
