@@ -131,7 +131,7 @@ if __name__=='__main__':
 
     
     procs = mp.cpu_count()
-    pool = mp.Pool(procs)
+    pool = mp.Pool(1)
     
     n_runs = 10000
     chunksize = int(math.ceil(n_runs / float(procs)))
