@@ -46,7 +46,8 @@ def run_bootstrap(idx,mode):
         with timed('Getting playcounts (idx={})'.format(idx)):
             playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
-            listening = np.random.multinomial(u,artist_probs)
+            listening = np.random.multinomial(u,artist_probs).astype(float)
+            listening = listening[listening>0]
             for i,f in enumerate(funcs):
                 result[i].append(f(listening))
         return [np.mean(r) for r in result]
@@ -66,7 +67,7 @@ def gini(array):
     # based on bottom eq: http://www.statsdirect.com/help/content/image/stat0206_wmf.gif
     # from: http://www.statsdirect.com/help/default.htm#nonparametric_methods/gini.htm
     #array = array.flatten() #all values are treated equally, arrays must be 1d
-    array = array[array>0]
+    #array = array[array>0]
     if np.amin(array) < 0:
         array -= np.amin(array) #values cannot be negative
     #array += 0.0000001 #values cannot be 0
