@@ -3,8 +3,8 @@ import sys,math,itertools,os
 import pandas as pd
 import numpy as np
 from functools import partial
-#sys.path.append('/backup/home/jared/thoth')
-#import thoth.thoth as thoth
+import scipy.stats 
+from scipy.stats import entropy as scipy_ent
 
 datadir = 'P:/Projects/BigMusic/jared.data/'
 
@@ -116,15 +116,18 @@ def unique_artists(arr):
     return float(len(arr))
 
 def entropy(arr):
-    return thoth.calc_entropy(arr,1000)[0]
+    return scipy_ent(arr,base=2)
+    #return thoth.calc_entropy(arr,1000)[0]
+
+funcs = [unique_artists,unique_artists_norm,entropy,gini]
 
 if __name__=='__main__':
 
-    try:
-        funckeys = sys.argv[1:]
-        funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm,'entropy':entropy}[f] for f in funckeys]
-    except KeyError:
-        raise Exception("Must provide a valid function name")
+    # try:
+    #     funckeys = sys.argv[1:]
+    #     funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm,'entropy':entropy}[f] for f in funckeys]
+    # except KeyError:
+    #     raise Exception("Must provide a valid function name")
 
     
     procs = mp.cpu_count()
