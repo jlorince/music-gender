@@ -47,10 +47,12 @@ with timed('sampling setup'):
     
     #for d in ('f_playcounts','m_playcounts','per_bucket_gender_counts'):
     #    np.save("{}bowie_support/{}.npy".format(datadir,d),vars()[d])
+    #user_data.to_pickle(datadir+'bowie_support/user_data.pkl')
 
     per_bucket_gender_counts = np.load(datadir+'bowie_support/per_bucket_gender_counts.npy')
     m_playcounts = np.load(datadir+'bowie_support/m_playcounts.npy')
     f_playcounts = np.load(datadir+'bowie_support/f_playcounts.npy')
+    user_data = pd.read_pickle(datadir+'bowie_support/user_data.pkl')
 
 ## Generate empirical multinomial distribution
 with timed('artist distribution setup'):
