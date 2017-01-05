@@ -3,8 +3,8 @@ import sys,math,itertools,os
 import pandas as pd
 import numpy as np
 from functools import partial
-sys.path.append('/backup/home/jared/thoth')
-import thoth.thoth as thoth
+#sys.path.append('/backup/home/jared/thoth')
+#import thoth.thoth as thoth
 
 datadir = 'P:/Projects/BigMusic/jared.data/'
 
