@@ -56,7 +56,7 @@ with timed('sampling setup'):
 with timed('artist distribution setup'):
     #artist_counts = user_artist_df[user_artist_df.artist!=-1].groupby('artist').n.sum()
     #artist_probs = (artist_counts / float(artist_counts.sum())).value_counts
-    np.save("{}bowie_support/{}.npy".format(datadir,'artist_probs'),artist_probs)
+    #np.save("{}bowie_support/{}.npy".format(datadir,'artist_probs'),artist_probs)
     artist_probs = np.load(datadir+'bowie_support/artist_probs.npy')
 
 
