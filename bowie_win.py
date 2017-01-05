@@ -30,31 +30,34 @@ class timed(object):
 with timed('sampling setup'):
 
     ## Generate per-bucket counts
-    #user_data = pd.read_table(datadir+'user_scrobble_counts_by_gender')
-    user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
-    user_data = user_artist_df[user_artist_df.artist!=-1].groupby('user_id').agg({'gender':lambda x: x.iloc[0],'n':np.sum}).reset_index()
-    user_data['floor_logn'] = user_data.n.apply(lambda x: int(np.log10(x)))
-    bin_counts = user_data.floor_logn.value_counts()
-    bin_weights = bin_counts / float(bin_counts.sum())
-    maxbin = bin_counts.index.max()
-    sample_size = (len(user_data[(user_data.floor_logn==maxbin)&(user_data.gender=='f')]) / 10.) *2
-    perc_mult = sample_size / bin_weights.ix[maxbin]
-    bucket_sizes = bin_weights * perc_mult
-    per_bucket_gender_counts = np.round(bucket_sizes/2).astype(int).sort_index().values
-    #user_data = user_data.set_index('user_id')
+    # user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
+    # user_data = user_artist_df[user_artist_df.artist!=-1].groupby('user_id').agg({'gender':lambda x: x.iloc[0],'n':np.sum}).reset_index()
+    # user_data['floor_logn'] = user_data.n.apply(lambda x: int(np.log10(x)))
+    # bin_counts = user_data.floor_logn.value_counts()
+    # bin_weights = bin_counts / float(bin_counts.sum())
+    # maxbin = bin_counts.index.max()
+    # sample_size = (len(user_data[(user_data.floor_logn==maxbin)&(user_data.gender=='f')]) / 10.) *2
+    # perc_mult = sample_size / bin_weights.ix[maxbin]
+    # bucket_sizes = bin_weights * perc_mult
+    # per_bucket_gender_counts = np.round(bucket_sizes/2).astype(int).sort_index().values
 
-    ## Generate male and female playcounts
-    m_playcounts = user_data[user_data.gender=='m'].n
-    f_playcounts = user_data[user_data.gender=='f'].n
+    # ## Generate male and female playcounts
+    # m_playcounts = user_data[user_data.gender=='m'].n
+    # f_playcounts = user_data[user_data.gender=='f'].n
+    
+    #for d in ('f_playcounts','m_playcounts','per_bucket_gender_counts'):
+    #    np.save("{}bowie_support/{}.npy".format(datadir,d),vars()[d])
+
+    per_bucket_gender_counts = np.load(datadir+'bowie_support/per_bucket_gender_counts.npy')
+    m_playcounts = np.load(datadir+'bowie_support/m_playcounts.npy')
+    f_playcounts = np.load(datadir+'bowie_support/f_playcounts.npy')
 
 ## Generate empirical multinomial distribution
 with timed('artist distribution setup'):
-    # if os.path.exists(datadir+'artist_probs.npy'):
-    #     artist_probs = np.load(datadir+'artist_probs.npy')
-    # else:
-        #user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
-    artist_counts = user_artist_df[user_artist_df.artist!=-1].groupby('artist').n.sum()
-    artist_probs = (artist_counts / float(artist_counts.sum())).values
+    #artist_counts = user_artist_df[user_artist_df.artist!=-1].groupby('artist').n.sum()
+    #artist_probs = (artist_counts / float(artist_counts.sum())).value_counts
+    np.save("{}bowie_support/{}.npy".format(datadir,'artist_probs'),artist_probs)
+    artist_probs = np.load(datadir+'bowie_support/artist_probs.npy')
 
 
 ###############################
@@ -128,7 +131,8 @@ if __name__=='__main__':
     #     funcs = [{'gini':gini,'unique_artists':unique_artists,'unique_artists_norm':unique_artists_norm,'entropy':entropy}[f] for f in funckeys]
     # except KeyError:
     #     raise Exception("Must provide a valid function name")
-
+    with timed('loading user_artist_df'):
+        user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
     
     procs = mp.cpu_count()
     pool = mp.Pool(1)
