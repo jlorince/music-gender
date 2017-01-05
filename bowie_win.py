@@ -137,7 +137,7 @@ if __name__=='__main__':
         user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
     
     procs = mp.cpu_count()
-    pool = mp.Poo(procs)
+    pool = mp.Pool(procs)
     
     n_runs = 10000
     chunksize = int(math.ceil(n_runs / float(procs)))
