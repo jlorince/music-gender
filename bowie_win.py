@@ -82,8 +82,8 @@ def create_pop_sample(seed=None):
 def run_bootstrap(idx,mode):
     with timed('Running bootstrap idx {} ({})'.format(idx,mode)):
         result = [[]]*len(funcs)
-        with timed('Getting playcounts (idx={})'.format(idx)):
-            playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
+        #with timed('Getting playcounts (idx={})'.format(idx)):
+        playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
             listening = np.random.multinomial(u,artist_probs)
             for i,f in enumerate(funcs):
@@ -154,6 +154,6 @@ if __name__=='__main__':
                 zscores = pool.map(func_partial,user_artist_df.groupby('user_id'))
             else:
                 zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode].groupby('user_id'))
-            with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join(funckeys),mode),'w') as fout:
+            with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join([str(f).split()[1] for f in funcs]),mode),'w') as fout:
                 for result in zscores:
                     fout.write('\t'.join(map(str,result))+'\n')
