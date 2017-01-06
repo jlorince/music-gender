@@ -96,7 +96,8 @@ def calc_zscore(user_data,bs_data):
     user_id,df = user_data
     result = []
     for i,f in enumerate(funcs):
-        result.append((f(df.n.values)-bs_data[i][0])/bs_data[i][1])
+        value = f(df.n.values.astype(float))
+        result += [value, (value-bs_data[i][0])/bs_data[i][1]]
     return [user_id,df.gender.iloc[0]]+result
 
 ###############################
