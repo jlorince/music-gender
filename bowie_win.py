@@ -145,13 +145,14 @@ if __name__=='__main__':
     n_runs = 10000
     chunksize = int(math.ceil(n_runs / float(procs)))
 
+    log = open('log','w')
     for mode in ('n','m','f'):
         func_partial = partial(run_bootstrap,mode=mode)
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
             results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
-            bs_data = [(np.mean(r),np.std(r)) for r in results]
-            with open('log','a') as out:
-                out.write(mode+'\t'+str(bs_data)+'\n')
+            bs_data = [(np.mean(r),np.std(r)) for r in results]            
+            log.write(mode+'\t'+str(bs_data)+'\n')
+            log.flush()
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
             func_partial = partial(calc_zscore,bs_data=bs_data)
