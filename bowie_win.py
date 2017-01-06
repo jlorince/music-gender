@@ -6,6 +6,7 @@ from functools import partial
 import scipy.stats 
 from scipy.stats import entropy as scipy_ent
 
+
 datadir = 'P:/Projects/BigMusic/jared.data/'
 
 import time,datetime
@@ -57,7 +58,7 @@ with timed('sampling setup'):
 ## Generate empirical multinomial distribution
 with timed('artist distribution setup'):
     #artist_counts = user_artist_df[user_artist_df.artist!=-1].groupby('artist').n.sum()
-    #artist_probs = (artist_counts / float(artist_counts.sum())).value_counts
+    #artist_probs = (artist_counts / float(artist_counts.sum()))
     #np.save("{}bowie_support/{}.npy".format(datadir,'artist_probs'),artist_probs)
     artist_probs = np.load(datadir+'bowie_support/artist_probs.npy')
 
@@ -125,7 +126,6 @@ def unique_artists(arr):
 
 def entropy(arr):
     return scipy_ent(arr,base=2)
-    #return thoth.calc_entropy(arr,1000)[0]
 
 funcs = [unique_artists,unique_artists_norm,entropy,gini]
 
@@ -137,7 +137,9 @@ if __name__=='__main__':
     # except KeyError:
     #     raise Exception("Must provide a valid function name")
     with timed('loading user_artist_df'):
-        user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
+        #user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
+        user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
+
     
     procs = mp.cpu_count()
     pool = mp.Pool(procs)
@@ -145,14 +147,16 @@ if __name__=='__main__':
     n_runs = 10000
     chunksize = int(math.ceil(n_runs / float(procs)))
 
-    log = open('log','w')
+
     for mode in ('n','m','f'):
         func_partial = partial(run_bootstrap,mode=mode)
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
             results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
-            bs_data = [(np.mean(r),np.std(r)) for r in results]            
-            log.write(mode+'\t'+str(bs_data)+'\n')
-            log.flush()
+            with open(datadir+'sampled_gender_results/raw_bootstrap_{}'.format(mode),'w') as out:
+                bs_data = [(np.mean(r),np.std(r)) for r in results]            
+                for i,r in enumerate(results):
+                    out.write(str(funcs[i]).split()[1] + '\t'+ ','.join(map(str,r)) + '\t' + str(bs_data[i][0]) + '\t' + str(bs_data[i][1]) + '\n')        
+            
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
             func_partial = partial(calc_zscore,bs_data=bs_data)
