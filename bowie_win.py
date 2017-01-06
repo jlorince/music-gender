@@ -81,7 +81,8 @@ def create_pop_sample(seed=None):
 
 def run_bootstrap(idx,mode):
     with timed('Running bootstrap idx {} ({})'.format(idx,mode)):
-        result = [[]]*len(funcs)
+        #result = [[]]*len(funcs)
+        result = [[] for _ in xrange(len(funcs))]
         #with timed('Getting playcounts (idx={})'.format(idx)):
         playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
         for u in playcounts:
@@ -143,18 +144,20 @@ if __name__=='__main__':
     n_runs = 10000
     chunksize = int(math.ceil(n_runs / float(procs)))
 
-    for mode in ('m','f'):
+    for mode in ('n','m','f'):
         func_partial = partial(run_bootstrap,mode=mode)
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
-            results = zip(*pool.map(func_partial,xrange(n_runs)))
+            results = zip(*pool.map(func_partial,xrange(n_runs)),chunksize=chunksize)
             bs_data = [(np.mean(r),np.std(r)) for r in results]
+            with open('log','a') as out:
+                out.write(mode+'\t'+str(bs_data)+'\n')
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
             func_partial = partial(calc_zscore,bs_data=bs_data)
             if mode =='n':
-                zscores = pool.map(func_partial,user_artist_df.groupby('user_id'))
+                zscores = pool.map(func_partial,user_artist_df.groupby('user_id'),chunksize=chunksize)
             else:
-                zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode].groupby('user_id'))
+                zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode].groupby('user_id'),chunksize=chunksize)
             with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join([str(f).split()[1] for f in funcs]),mode),'w') as fout:
                 for result in zscores:
                     fout.write('\t'.join(map(str,result))+'\n')
