@@ -147,7 +147,7 @@ if __name__=='__main__':
     for mode in ('n','m','f'):
         func_partial = partial(run_bootstrap,mode=mode)
         with timed('running bootstrap, mode={}'.format(mode),pad='------'):
-            results = zip(*pool.map(func_partial,xrange(n_runs)),chunksize=chunksize)
+            results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
             bs_data = [(np.mean(r),np.std(r)) for r in results]
             with open('log','a') as out:
                 out.write(mode+'\t'+str(bs_data)+'\n')
