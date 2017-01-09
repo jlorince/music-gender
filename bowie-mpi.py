@@ -11,8 +11,8 @@ from mpi4py import MPI
 ###############################
 
 funcs = [unique_artists,unique_artists_norm,entropy,gini]
-datadir = 'P:/Projects/BigMusic/jared.data/'
-n_runs = 10000
+datadir = '/projects/p30035/'
+n_runs = 10
 
 ###############################
 ### Setup
@@ -103,7 +103,7 @@ def run_bootstrap(idx,mode):
         result = [[] for _ in xrange(len(funcs))]
         #with timed('Getting playcounts (idx={})'.format(idx)):
         playcounts = {'m':m_playcounts,'f':f_playcounts,'n':create_pop_sample()}[mode]
-        for u in playcounts:
+        for u in playcounts[:100]:
             listening = np.random.multinomial(u,artist_probs).astype(float)
             listening = listening[listening>0]
             for i,f in enumerate(funcs):
@@ -151,27 +151,21 @@ def entropy(arr):
 
 runs_per_rank = int(math.ceil(n_runs / float(size)))
 start_idx = runs_per_rank * rank
-result = [run_bootstrap(i) for i in xrange(start_idx,min(n_runs,start_idx+runs_per_rank))]
-
-combined = []
-[combined+= r for r in comm.gather(result,root=0)]
 
 
 log = open('log','w')
 for mode in ('n','m','f'):
-    func_partial = partial(run_bootstrap,mode=mode)
-    with timed('running bootstrap, mode={}'.format(mode),pad='------'):
-        results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
-        bs_data = [(np.mean(r),np.std(r)) for r in results]            
-        log.write(mode+'\t'+str(bs_data)+'\n')
-        log.flush()
 
-    with timed('generating z-scores, mode={}'.format(mode),pad='------'):
-        func_partial = partial(calc_zscore,bs_data=bs_data)
-        if mode =='n':
-            zscores = pool.map(func_partial,user_artist_df.groupby('user_id'),chunksize=chunksize)
-        else:
-            zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode].groupby('user_id'),chunksize=chunksize)
-        with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join([str(f).split()[1] for f in funcs]),mode),'w') as fout:
-            for result in zscores:
-                fout.write('\t'.join(map(str,result))+'\n')
+    result = [run_bootstrap(i,mode=mode) for i in xrange(start_idx,min(n_runs,start_idx+runs_per_rank))]
+
+
+    gathered = comm.gather(result,root=0):
+    if rank ==0:
+        combined = []
+        for r in gathered:
+            combined += r
+        results = zip(*combined)
+        bs_data = [(np.mean(r),np.std(r)) for r in results]
+
+        for i,r in enumerate(results):
+            log.write(str(funcs[i]).split()[1] + '\t'+ ','.join(map(str,r)) + '\t' + str(bs_data[i][0]) + '\t' + str(bs_data[i][1]) + '\n') 
