@@ -50,17 +50,17 @@ with timed('sampling setup'):
     #    np.save("{}bowie_support/{}.npy".format(datadir,d),vars()[d])
     #user_data.to_pickle(datadir+'bowie_support/user_data.pkl')
 
-    per_bucket_gender_counts = np.load(datadir+'bowie_support/per_bucket_gender_counts.npy')
-    m_playcounts = np.load(datadir+'bowie_support/m_playcounts.npy')
-    f_playcounts = np.load(datadir+'bowie_support/f_playcounts.npy')
-    user_data = pd.read_pickle(datadir+'bowie_support/user_data.pkl')
+    per_bucket_gender_counts = np.load(datadir+'bowie_support/per_bucket_gender_counts_10k.npy')
+    m_playcounts = np.load(datadir+'bowie_support/m_playcounts_10k.npy')
+    f_playcounts = np.load(datadir+'bowie_support/f_playcounts_10k.npy')
+    user_data = pd.read_pickle(datadir+'bowie_support/user_data_10k.pkl')
 
 ## Generate empirical multinomial distribution
 with timed('artist distribution setup'):
     #artist_counts = user_artist_df[user_artist_df.artist!=-1].groupby('artist').n.sum()
     #artist_probs = (artist_counts / float(artist_counts.sum()))
     #np.save("{}bowie_support/{}.npy".format(datadir,'artist_probs'),artist_probs)
-    artist_probs = np.load(datadir+'bowie_support/artist_probs.npy')
+    artist_probs = np.load(datadir+'bowie_support/artist_probs_10k.npy')
 
 
 ###############################
