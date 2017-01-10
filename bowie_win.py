@@ -137,8 +137,9 @@ if __name__=='__main__':
     # except KeyError:
     #     raise Exception("Must provide a valid function name")
     with timed('loading user_artist_df'):
-        #user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
-        user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
+        user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender_idx10k',header=None,names=['user_id','gender','artist','n'])
+        user_artist_df = user_artist_df[user_artist_df.artist!=-1]
+        #user_artist_df = pd.read_table(datadir+'user_artist_scrobble_counts_by_gender',header=None,names=['user_id','gender','artist','n'])
 
     
     procs = mp.cpu_count()
@@ -149,19 +150,21 @@ if __name__=='__main__':
 
 
     for mode in ('n','m','f'):
-        func_partial = partial(run_bootstrap,mode=mode)
-        with timed('running bootstrap, mode={}'.format(mode),pad='------'):
-            results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
-            with open(datadir+'sampled_gender_results/raw_bootstrap_{}'.format(mode),'w') as out:
-                bs_data = [(np.mean(r),np.std(r)) for r in results]            
-                for i,r in enumerate(results):
-                    out.write(str(funcs[i]).split()[1] + '\t'+ ','.join(map(str,r)) + '\t' + str(bs_data[i][0]) + '\t' + str(bs_data[i][1]) + '\n')        
-            
+        # func_partial = partial(run_bootstrap,mode=mode)
+        # with timed('running bootstrap, mode={}'.format(mode),pad='------'):
+        #     results = zip(*pool.map(func_partial,xrange(n_runs),chunksize=chunksize))
+        #     with open(datadir+'sampled_gender_results/raw_bootstrap_{}'.format(mode),'w') as out:
+        #         bs_data = [(np.mean(r),np.std(r)) for r in results]            
+        #         for i,r in enumerate(results):
+        #             out.write(str(funcs[i]).split()[1] + '\t'+ ','.join(map(str,r)) + '\t' + str(bs_data[i][0]) + '\t' + str(bs_data[i][1]) + '\n')        
+
+        current = pd.read_table('P:/Projects/BigMusic/jared.data/sampled_gender_results/raw_bootstrap_{}'.format(mode),header=None,names=['metric','values','mean','std'])
+        bs_data = [(row['mean'],row['std']) for i, row in current.iterrows()]            
 
         with timed('generating z-scores, mode={}'.format(mode),pad='------'):
             func_partial = partial(calc_zscore,bs_data=bs_data)
             if mode =='n':
-                zscores = pool.map(func_partial,user_artist_df.groupby('user_id'),chunksize=chunksize)
+                zscores = pool.map(func_partial,user_artist_df.groupby('user_id'))
             else:
                 zscores = pool.map(func_partial,user_artist_df[user_artist_df.gender==mode].groupby('user_id'),chunksize=chunksize)
             with open(datadir+'sampled_gender_results/{}_{}'.format('-'.join([str(f).split()[1] for f in funcs]),mode),'w') as fout:
