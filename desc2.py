@@ -7,6 +7,7 @@ import pickle
 import datetime
 import multiprocessing as mp
 import empty_module
+from tqdm import tqdm as tq
 
 ### FILTERS
 filter_gender = ['m','f']
@@ -61,6 +62,6 @@ if __name__ == '__main__':
     
     for ids,gender in zip([ids_m,ids_f],['m','f']):
         with open('results','w') as out:
-            for uid,result in pool.imap_unordered(songs_per_artist,ids,chunksize=100):
+            for uid,result in tq(pool.imap_unordered(songs_per_artist,ids,chunksize=100),total=len(ids_f)+len(ids_m)):
                 out.write("{}\t{}\t{}\n".format(uid,gender,result))
     
