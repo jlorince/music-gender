@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     ### RUN MAIN PROCESSING
 
-    pool = mp.Pool(procs)
+    pool = mp.Pool(n_procs)
     
     for ids,gender in zip([ids_m,ids_f],['m','f']):
         with open('results','w') as out:
