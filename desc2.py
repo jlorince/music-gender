@@ -61,7 +61,7 @@ if __name__ == '__main__':
     pool = mp.Pool(n_procs)
     
     for ids,gender in zip([ids_m,ids_f],['m','f']):
-        with open('results','w') as out:
+        with open('results/songs_per_artist','w') as out:
             for uid,result in tq(pool.imap_unordered(songs_per_artist,ids,chunksize=100),total=len(ids_f)+len(ids_m)):
                 out.write("{}\t{}\t{}\n".format(uid,gender,result))
     
