@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument("--sample", help="Threshold for configuring which higher-frequency words (songs) are randomly downsampled (see Doc2Vec documentation).",type=int,default=0)
     parser.add_argument("--workers", help="Number of workers to use in parallel computations. Defaults to output of mp.cpu_count()",type=int,default=mp.cpu_count())
     parser.add_argument("--preprocess", action='store_true',help="Perform initial preprocessing of raw data files.")
-    parser.add_argument("--scrobble_dir", help="Location of the raw scrobble files (one file per user).",type=str,default='P:/Projects/WoS/parsed/abstracts/')
+    parser.add_argument("--scrobble_dir", help="Location of the raw scrobble files (one file per user).",type=str,default='P:/Projects/BigMusic/scrobbles-complete/')
     parser.add_argument("--d2v_dir", help="Output directory. A new subfolder in this directory will be generated for each new model run",type=str,default='P:/Projects/BigMusic/D2V/')
     parser.add_argument("--norm", action='store_true',help="If provided, also generate l2-normed word and document vector arrays.")
 
@@ -97,3 +97,7 @@ with timed('Saving data'):
         np.save('{0}{1}/user_features_normed_{1}.npy'.format(args.d2v_dir,pathname),normed)
         np.save('{0}{1}/song_features_normed_{1}.npy'.format(args.d2v_dir,pathname),words_normed)
     model.save('{0}{1}/model_{1}'.format(args.d2v_dir,pathname))
+    with open('{0}{1}/song_indices_{1}'.format(args.d2v_dir,pathname),'w') as out:
+        for song in model.wv.index2word:
+            out.write(str(song)+'\n')
+
