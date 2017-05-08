@@ -31,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument("--sampling", help="Method for randomly downsampling points. If `random` is used, `sample_size` total points are sampled. if `by_year`, randomly sample `sample_size` points *from each year* are sampled. Defaults to using all points in the input array.",type=str,default=None,choices=['random','by_year'])
     parser.add_argument("--sample_size", help="Number of points to randomly sample. See `sampling`. Ignored if `sampling` is not specified.",type=int,default=None)
     parser.add_argument('--input', required=True,help = 'input numpy file (assumed to be n_items x n_features numpy array)')
-    parser.add_argument('--years', help = 'Path to numpy file with release year for each song. Only used if `sampling`="by_year"', default=None,dtype=str)
+    parser.add_argument('--years', help = 'Path to numpy file with release year for each song. Only used if `sampling`="by_year"', default=None,type=str)
     parser.add_argument('--prop', default = -1, type = int, help = 'number of propagations (see largevis documentation). Default 3.')
     parser.add_argument('--alpha', default = -1, type = float, help = 'learning rate (see largevis documentation). Default 1.0')
     parser.add_argument('--trees', default = -1, type = int, help = 'number of rp-trees (see largevis documentation). Default is set according to the data size.')
