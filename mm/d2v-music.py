@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("--size", help="Dimensionality of D2V vectors (see Doc2Vec documentation).",type=int,default=100)
     parser.add_argument("--window", help="Doc2Vec window size (see Doc2Vec documentation).",type=int,default=5)
     parser.add_argument("--min_count", help="Mininum number of times a word (song) must occur to be included in model (see Doc2Vec documentation).",type=int,default=5)
-    parser.add_argument("--sample", help="Threshold for configuring which higher-frequency words (songs) are randomly downsampled (see Doc2Vec documentation).",type=int,default=0)
+    parser.add_argument("--sample", help="Threshold for configuring which higher-frequency words (songs) are randomly downsampled (see Doc2Vec documentation).",type=float,default=0)
     parser.add_argument("--workers", help="Number of workers to use in parallel computations. Defaults to output of mp.cpu_count()",type=int,default=mp.cpu_count())
     parser.add_argument("--preprocess", action='store_true',help="Perform initial preprocessing of raw data files.")
     parser.add_argument("--scrobble_dir", help="Location of the raw scrobble files (one file per user).",type=str,default='P:/Projects/BigMusic/scrobbles-complete/')
@@ -55,6 +55,11 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
+
+
+    # in case user forgets trailing slash
+    if not args.d2v_dir.endswith('/'):
+        args.d2v_dir = args.d2v_dir + '/'
 
 
     if args.preprocess:
@@ -71,33 +76,30 @@ if __name__ == '__main__':
 
     documents = TaggedLineDocument(args.d2v_dir+'docs_songs.txt.gz')
 
-    pathname = "{}-{}-{}-{}-{}".format(args.size,args.window,args.min_count,args.sample)
+    pathname = "{}-{}-{}-{}".format(args.size,args.window,args.min_count,args.sample)
     if os.path.exists(args.d2v_dir+pathname):
         raise Exception("It appears this model has already been run.")
     else:
         os.mkdir(args.d2v_dir+pathname)
-    if args.year_sample:
-        np.save('{}{}/doc_indices_sampled_{}.npy'.format(args.d2v_dir,pathname),indices_to_write)
            
 
+    with timed('Running Doc2Vec'):
+        model = Doc2Vec(documents, dm=1, sample=args.sample, size=args.size, window=args.window, min_count=args.min_count,workers=args.workers)
 
-with timed('Running Doc2Vec'):
-    model = Doc2Vec(documents, dm=1, sample=args.sample, size=args.size, window=args.window, min_count=args.min_count,workers=args.workers)
-
-if args.normed:
-    with timed('Norming vectors'):
-        from sklearn.preprocessing import Normalizer
-        nrm = Normalizer('l2')
-        normed = nrm.fit_transform(model.docvecs.doctag_syn0)
-        words_normed = nrm.fit_transform(model.wv.syn0)
+    if args.norm:
+        with timed('Norming vectors'):
+            from sklearn.preprocessing import Normalizer
+            nrm = Normalizer('l2')
+            normed = nrm.fit_transform(model.docvecs.doctag_syn0)
+            words_normed = nrm.fit_transform(model.wv.syn0)
 
 
-with timed('Saving data'):
-    if args.normed:        
-        np.save('{0}{1}/user_features_normed_{1}.npy'.format(args.d2v_dir,pathname),normed)
-        np.save('{0}{1}/song_features_normed_{1}.npy'.format(args.d2v_dir,pathname),words_normed)
-    model.save('{0}{1}/model_{1}'.format(args.d2v_dir,pathname))
-    with open('{0}{1}/song_indices_{1}'.format(args.d2v_dir,pathname),'w') as out:
-        for song in model.wv.index2word:
-            out.write(str(song)+'\n')
+    with timed('Saving data'):
+        if args.norm:        
+            np.save('{0}{1}/user_features_normed_{1}.npy'.format(args.d2v_dir,pathname),normed)
+            np.save('{0}{1}/song_features_normed_{1}.npy'.format(args.d2v_dir,pathname),words_normed)
+        model.save('{0}{1}/model_{1}'.format(args.d2v_dir,pathname))
+        with open('{0}{1}/song_indices_{1}'.format(args.d2v_dir,pathname),'w') as out:
+            for song in model.wv.index2word:
+                out.write(str(song)+'\n')
 

@@ -5,3 +5,4 @@ multiprocess
 ipython
 jupyter
 datashader
+jupyter
