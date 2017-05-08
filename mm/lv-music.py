@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
 
     print "loading numpy file..."
-    features = np.load(args.infile)
+    features = np.load(args.input)
     print features.shape
 
     if args.sampling == 'random':
@@ -84,12 +84,12 @@ if __name__ == '__main__':
         filename = '.{}.year_lv_coords'.format(args.sample_size)
     else:
         filename = '.{}.lv_coords'.format(args.sample_size)
-    LargeVis.save(args.infile+filename)
+    LargeVis.save(args.input+filename)
 
     donestring = """
     -----PROCESSING COMPLETE-----
     2D Embedding saved as: {}
     Random indices saves as as: {}
-    """.format(args.infile+filename,args.input+idx_filename)
+    """.format(args.input+filename,args.input+idx_filename)
 
 
