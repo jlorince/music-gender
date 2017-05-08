@@ -11,7 +11,9 @@ from tqdm import tqdm as tq
 
 ### FILTERS
 filter_gender = ['m','f']
-#filter_playcount = 1000
+
+genre_data = pd.read_csv("U:/Users/jjl2228/Desktop/gracenote_genre_data.csv").set_index('index')
+
 
 ### SUPPORT FUNCTIONS
 
@@ -25,6 +27,9 @@ def parse_df(fi,include_time=False):
 def songs_per_artist(uid):
     df = parse_df('P:/Projects/BigMusic/jared.IU/scrobbles-complete/{}.txt'.format(uid))
     return uid,len(df)/float(len(df.artist_id.unique()))
+
+def genre_entropy(uid):
+    df = parse_df('P:/Projects/BigMusic/jared.IU/scrobbles-complete/{}.txt'.format(uid)).merge(genre_data,on='artist_id')
 
 
 if __name__ == '__main__':
@@ -40,12 +45,12 @@ if __name__ == '__main__':
   
 
     ### METADATA HANDLING
-    user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'])
+    user_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_users.txt',header=None,names=['user_name','user_id','country','age','gender','subscriber','playcount','playlists','bootstrap','registered','type','anno_count','scrobbles_private','scrobbles_recorded','sample_playcount','realname'],usecols=['user_id','gender','sample_playcount'],na_values=['\\N'])
 
-    user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
-    user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
+    #user_data['sample_playcount'][user_data['sample_playcount']=='\\N'] = 0 
+    #user_data['sample_playcount'] = user_data['sample_playcount'].astype(int)
 
-    filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>0)][['user_id','gender','sample_playcount']]
+    filtered = user_data.loc[(user_data['gender'].isin(filter_gender)) & (user_data['sample_playcount']>0)]
 
     ids_f = set(filtered[filtered['gender']=='f']['user_id'])
     ids_m = set(filtered[filtered['gender']=='m']['user_id'])

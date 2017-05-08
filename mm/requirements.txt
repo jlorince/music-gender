@@ -1,0 +1,7 @@
+gensim
+numpy
+tqdm
+multiprocess
+ipython
+jupyter
+datashader
