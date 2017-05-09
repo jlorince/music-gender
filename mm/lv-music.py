@@ -47,6 +47,8 @@ if __name__ == '__main__':
 
     print "loading numpy file..."
     features = np.load(args.input)
+    if np.any(np.isnan(features)):
+        raise Exception("Array cannot contain NaNs!!")
     print features.shape
 
     if args.sampling == 'random':
@@ -79,8 +81,11 @@ if __name__ == '__main__':
 
     LargeVis.loadfile(args.temp+"lv_format.txt")
 
-    Y = LargeVis.run(2, args.threads, args.samples, args.prop, args.alpha, args.trees, args.neg, args.neigh, args.gamma, args.perp)
-    if arg.sampling == 'by_year':
+    # samples only matters for graph layout
+    samples = -1
+    gamma = -1
+    Y = LargeVis.run(2, args.threads, samples, args.prop, args.alpha, args.trees, args.neg, args.neigh, gamma, args.perp)
+    if args.sampling == 'by_year':
         filename = '.{}.year_lv_coords'.format(args.sample_size)
     else:
         filename = '.{}.lv_coords'.format(args.sample_size)
@@ -89,7 +94,11 @@ if __name__ == '__main__':
     donestring = """
     -----PROCESSING COMPLETE-----
     2D Embedding saved as: {}
-    Random indices saves as as: {}
-    """.format(args.input+filename,args.input+idx_filename)
+    """.format(args.input+filename)
+    if args.sampling is not None:
+        donestring += "\nRandom indices saves as as: {}".format(args.input+idx_filename)
+    print(donestring)
+
+
 
 
